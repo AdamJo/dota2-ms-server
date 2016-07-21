@@ -14,7 +14,7 @@ var database = firebase.database();
 
 
 function runPython() {
-  console.log('- runing python... -')
+  console.log('- running python... -')
   child_process.execSync('python3 /home/boomsy/projects/firebase-server-update/dotaApi.py', {timeout: 10000, stdio:[0,1,2]})
   console.log('+ Python completed! +')
 }
