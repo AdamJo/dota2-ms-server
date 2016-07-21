@@ -11,23 +11,52 @@ import re
 CLIENT = MongoClient("mongodb://127.0.0.1:27017/")
 DB = CLIENT['dota']
 
+DB.key.find_one()['steam']
+
+
+API = dota2API.Initialise(
+  DB.key.find_one()['steam'],
+  logging=True
+)
+
 #used for testing file content to be viewed in browser with python http server
 def writeToDisk(name, export):
   with open('/home/boomsy/projects/firebase-server-update/resources/{0}.txt'.format(name), 'w') as f:
     f.write(json.dumps(export, separators=(',',':')))
 
 # human readable league name, shoudl only be used once per new game
-def formatLeague(api, leagueId):
+def formatLeague(leagueId):
+  # if file doesn't exist go to league'
   try:
-    getLeagueListing = api.get_league_listing()
-    DB.statusCode.save({'_id': 102, 'get_league_listing': 'Up'})
-  except Exception:
-    DB.statusCode.save({'_id': 102, 'get_league_listing': 'Down'})
-    return
+    with open('/home/boomsy/projects/firebase-server-update/resources/leagues.json', 'r') as data_file:
+      league_data = json.load(data_file)
+      if str(leagueId) in league_data:
+        league = league_data[str(leagueId)]
+      else:
+        try:
+          getLeagueListing = API.get_league_listing()
+          DB.statusCode.save({'_id': 102, 'get_league_listing': 'Up'})
+        except Exception:
+          DB.statusCode.save({'_id': 102, 'get_league_listing': 'Down'})
+          return
 
-  leagueListing = getLeagueListing['leagues']
-  writeToDisk('LeagueListings', leagueListing)
-  league = next(league for league in leagueListing if leagueId == league['leagueid'])
+        leagueListing = getLeagueListing['leagues']
+        writeLeagueListing('leagues', leagueListing)
+        writeToDisk('LeagueListings', leagueListing)
+        league = next(league for league in leagueListing if leagueId == league['leagueid'])
+  except IOError:
+    try:
+      getLeagueListing = API.get_league_listing()
+      DB.statusCode.save({'_id': 102, 'get_league_listing': 'Up'})
+    except Exception:
+      DB.statusCode.save({'_id': 102, 'get_league_listing': 'Down'})
+      return
+
+    leagueListing = getLeagueListing['leagues']
+    writeLeagueListing('leagues', leagueListing)
+    writeToDisk('LeagueListings', leagueListing)
+    league = next(league for league in leagueListing if leagueId == league['leagueid'])
+
   writeToDisk('league', league)
   league.pop('description');
   league.pop('itemdef');
@@ -111,7 +140,7 @@ def popUnused(selectedGame):
   return selectedGame
 
 # switches barracks/tower to binary format, 1 is true, 0 is false
-# https://dota2api.readthedocs.io/en/latest/responses.html#single-team-tower-status
+# https://dota2API.readthedocs.io/en/latest/responses.html#single-team-tower-status
 def formatObjectives(scoreboard):
   scoreboard['dire']['barracks_state'] = "{0:06b}".format(scoreboard['dire']['barracks_state'])
   scoreboard['dire']['tower_state'] = "{0:11b}".format(scoreboard['dire']['tower_state'])
@@ -120,7 +149,7 @@ def formatObjectives(scoreboard):
   return scoreboard
 
 # organize player and tournament information
-def formatPlayers(api, selectedGame, callLeagueListing):
+def formatPlayers(selectedGame, callLeagueListing):
   
   scoreboard = selectedGame['scoreboard']
   dire = selectedGame['scoreboard']['dire']
@@ -129,7 +158,7 @@ def formatPlayers(api, selectedGame, callLeagueListing):
   # replace league_id with league info, only calls if does not exist in current one.
   if callLeagueListing:
     print('+ formatLeague +')
-    selectedGame['league'] = formatLeague(api, selectedGame['league_id'])
+    selectedGame['league'] = formatLeague(selectedGame['league_id'])
     selectedGame.pop('league_id')
     print('- formatLeague -')
 
@@ -240,16 +269,9 @@ def sortOD(od):
 def main():
 
   callLeagueListing = False
-  collection = DB.key.find_one()
-
-
-  api = dota2api.Initialise(
-    collection['steam'],
-    logging=True
-  )
 
   try:
-    liveLeageGame = api.get_live_league_games()
+    liveLeageGame = API.get_live_league_games()
     DB.statusCode.save({'_id': 101, 'get_live_league_games': 'Up'})
   except Exception:
     DB.statusCode.save({'_id': 101, 'get_live_league_games': 'Down'})
@@ -296,7 +318,7 @@ def main():
       return
 
     try:
-      selectedGame = formatPlayers(api, selectedGame, callLeagueListing)
+      selectedGame = formatPlayers(selectedGame, callLeagueListing)
     except Exception as e:
       print('formatPlayer failed')
       print('error {0}'.format(e))
