@@ -11,6 +11,7 @@ def writeToDisk(name, export):
 def jsonWriteToDisk(name, export):
   with open('./resources/{0}.json'.format(name), 'w') as f:
     f.write(json.dumps(export, separators=(',',':')))
+  print('+ wrote {0} to ./resources/{0}.json +'.format(name))
 
 # convert from array of object to key and object
 # adds blank item slot and replaces recipe url to work
@@ -66,7 +67,7 @@ def updateItems(api):
 
 # starts mongo, grabs key, runs update
 def main():
-  client = MongoClient("mongodb://localhost:27017/")
+  client = MongoClient("mongodb://127.0.0.1:27017/")
 
   db = client['dota']
   collection  = db.key.find_one()

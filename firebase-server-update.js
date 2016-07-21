@@ -1,24 +1,26 @@
 const firebase = require('firebase');
 const MongoClient = require('mongodb').MongoClient;
 const child_process = require('child_process');
-const schedule = require('node-schedule');
-
-function runPython() {
-  console.log('\n - runing python... - \n')
-  child_process.execSync('python3 dotaApi.py', {timeout: 10000})
-  console.log('\n + Python completed! + \n')
-}
+const CronJob = require('cron').CronJob;
 
 
 var config = {
-  serviceAccount: "./dota2-project-d42951d006e1.json",
+  serviceAccount: "/home/boomsy/projects/firebase-server-update/dota2-project-d42951d006e1.json",
   databaseURL: "https://dota2-project-c0fd5.firebaseio.com"
 };
 firebase.initializeApp(config);
 
 var database = firebase.database();
 
-//schedule.scheduleJob('* /16 * * * * *', () => {
+
+function runPython() {
+  console.log('- runing python... -')
+  child_process.execSync('python3 /home/boomsy/projects/firebase-server-update/dotaApi.py', {timeout: 10000, stdio:[0,1,2]})
+  console.log('+ Python completed! +')
+}
+
+function updateDatabase() {
+
   MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
     if(!err) {
 
@@ -28,15 +30,14 @@ var database = firebase.database();
         let collection = db.collection('currentGame')
 
         collection.findOne({'_id': 1}, (err, doc) => {
-          console.log("\n - updating data to firebase - \n")
+          console.log("+ updating data to firebase +")
 
+	  //not needed for web client
           delete doc._id;
-          delete doc.lobby_id;
-          delete doc.league.itemdef;
           delete doc.league.league_id;
 
-          database.ref('currentGame').set(doc);
-          console.log("\n + updated data to firebase + \n")
+          //database.ref('currentGame').set(doc);
+          console.log("- updated data to firebase -")
 
    	  db.close();
         });
@@ -44,6 +45,9 @@ var database = firebase.database();
 	console.log('error with mongo');
 	console.log(err);
     }
-
   });
-//});
+}
+
+new CronJob('*/16 * * * * *', () => {
+	updateDatabase()
+}, null, true, null, null, true);

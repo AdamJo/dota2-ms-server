@@ -13,7 +13,7 @@ DB = CLIENT['dota']
 
 #used for testing file content to be viewed in browser with python http server
 def writeToDisk(name, export):
-  with open('./resources/{0}.txt'.format(name), 'w') as f:
+  with open('/home/boomsy/projects/firebase-server-update/resources/{0}.txt'.format(name), 'w') as f:
     f.write(json.dumps(export, separators=(',',':')))
 
 # human readable league name, shoudl only be used once per new game
@@ -62,7 +62,7 @@ def nightDayCycle(duration):
 
 # change items to an array to easily pull from client
 def easyItems(player):
-  with open('./resources/items.json', 'r') as data_file:
+  with open('/home/boomsy/projects/firebase-server-update/resources/items.json', 'r') as data_file:
     item_data = json.load(data_file)
     allItems = []
     items = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5']
@@ -79,7 +79,7 @@ def easyItems(player):
 
 # convert hero_id to hero name that works with link below so client can easily fetch
 def easyHeroes(hero_id):
-  with open('./resources/heroes.json', 'r') as data_file:
+  with open('/home/boomsy/projects/firebase-server-update/resources/heroes.json', 'r') as data_file:
     heroes_data = json.load(data_file)
     regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
     # using str() to read from json data
@@ -92,7 +92,7 @@ def easyHeroes(hero_id):
 # convert hero_id to hero name that works with link below so client can easily fetch
 def formatDraft(draft):
   allDraft = []
-  with open('./resources/heroes.json', 'r') as data_file:
+  with open('/home/boomsy/projects/firebase-server-update/resources/heroes.json', 'r') as data_file:
     heroes_data = json.load(data_file)
     for hero in draft:
       regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
@@ -245,7 +245,7 @@ def main():
 
   api = dota2api.Initialise(
     collection['steam'],
-    logging=True # add in production
+    logging=True
   )
 
   try:
@@ -260,11 +260,10 @@ def main():
     sortedGamesBySpectators = sorted(liveLeageGame['games'], key=itemgetter('spectators'), reverse=True)
   except Exception as e:
     print('sort by spectators failed')
-    print (e)
+    print ('error {0}'.format(e))
     return
 
   # if this fails then something went wrong with the api call and don't run the program
-  print(len(sortedGamesBySpectators))
   if len(sortedGamesBySpectators) > 0:
     try:
       for (index, game) in enumerate(sortedGamesBySpectators):
@@ -296,27 +295,22 @@ def main():
       print (e)
       return
 
-    '''
-    # try :
-      # api.get_match_details(match_id=selectedGame['match_id'])
-    #except Exception:
-      #formatPlayers(api, heroes, items, selectedGame)
-    '''
-    selectedGame = formatPlayers(api, selectedGame, callLeagueListing)
-    '''
     try:
+      selectedGame = formatPlayers(api, selectedGame, callLeagueListing)
     except Exception as e:
       print('formatPlayer failed')
-      print (e)
+      print('error {0}'.format(e))
       return
-    '''
+
     try:
       selectedGame['_id'] = 1
       _id = DB.currentGame.save(selectedGame)
     except Exception as e:
       print('mongodb save failed')
-      print(e)
+      print('error {0}'.format(e))
       return
+  else:
+    print('game length < 0')
 
 if __name__ == '__main__':
   start_time = time.time()
