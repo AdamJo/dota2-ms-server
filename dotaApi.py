@@ -8,7 +8,7 @@ import sys
 import re
 
 # make DB and client global
-CLIENT = MongoClient("mongodb://localhost:27017/")
+CLIENT = MongoClient("mongodb://127.0.0.1:27017/")
 DB = CLIENT['dota']
 
 #used for testing file content to be viewed in browser with python http server
@@ -263,7 +263,8 @@ def main():
     print (e)
     return
 
-  # if this fails then something went wrong with the api call and don't run the program'
+  # if this fails then something went wrong with the api call and don't run the program
+  print(len(sortedGamesBySpectators))
   if len(sortedGamesBySpectators) > 0:
     try:
       for (index, game) in enumerate(sortedGamesBySpectators):
@@ -275,20 +276,21 @@ def main():
           print ('probably in lobby')
 
       # determine if league exists in old if it does replace
+
       leagueInfo = DB.currentGame.find_one({"_id": 1})
       # print (selectedGame['league_id'], leagueInfo['league']['league_id'])
-
-      if 'league' in leagueInfo and 'league_id' in selectedGame:
-        if selectedGame['league_id'] == leagueInfo['league']['league_id']:
-          print ('+ callLeagueListing : False +') 
-          selectedGame['league'] = leagueInfo['league'];
-          selectedGame.pop('league_id')
+      if leagueInfo:
+        if 'league' in leagueInfo and 'league_id' in selectedGame:
+          if selectedGame['league_id'] == leagueInfo['league']['league_id']:
+            print ('+ callLeagueListing : False +') 
+            selectedGame['league'] = leagueInfo['league'];
+            selectedGame.pop('league_id')
+          else:
+            print ('+ callLeagueListing : True +') 
+            callLeagueListing = True
         else:
-          print ('+ callLeagueListing : True +') 
+          print ('+ callLeagueListing : True +')  
           callLeagueListing = True
-      else:
-        print ('+ callLeagueListing : True +')  
-        callLeagueListing = True
     except Exception as e:
       print('something broke after sorting live games')
       print (e)
