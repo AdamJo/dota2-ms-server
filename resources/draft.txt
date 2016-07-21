@@ -1,1 +1,0 @@
-{"dire": {"bans": [{"hero_id": 32}, {"hero_id": 98}, {"hero_id": 110}, {"hero_id": 56}], "picks": [{"hero_id": 91}, {"hero_id": 55}, {"hero_id": 48}, {"hero_id": 25}]}, "radiant": {"ban": [{"hero_id": 91}, {"hero_id": 55}, {"hero_id": 48}, {"hero_id": 25}], "picks": [{"hero_id": 103}, {"hero_id": 41}, {"hero_id": 13}, {"hero_id": 8}]}}
