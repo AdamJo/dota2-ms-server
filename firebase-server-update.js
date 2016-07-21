@@ -47,7 +47,12 @@ function updateDatabase() {
     }
   });
 }
-
+// run evey 16 seconds, api updates every 15 seconds
+// null : run on complete
+// true : start the cronjob object
+// null : time zone
+// null : context e.g. this.stop()
+// true : immediately fire the job on startup
 new CronJob('*/16 * * * * *', () => {
 	updateDatabase()
 }, null, true, null, null, true);
