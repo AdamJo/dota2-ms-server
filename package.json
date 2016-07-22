@@ -11,9 +11,6 @@
   "dependencies": {
     "cron": "^1.1.0",
     "firebase": "^3.1.0",
-    "forever": "^0.15.2",
-    "mongodb": "^2.2.0",
-    "request": "^2.72.0",
-    "sort-object": "^3.0.2"
+    "mongodb": "^2.2.0"
   }
 }
