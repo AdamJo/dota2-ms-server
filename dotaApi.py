@@ -14,7 +14,7 @@ DB = CLIENT['dota']
 DB.key.find_one()['steam']
 
 
-API = dota2API.Initialise(
+API = dota2api.Initialise(
   DB.key.find_one()['steam'],
   logging=True
 )
@@ -23,6 +23,13 @@ API = dota2API.Initialise(
 def writeToDisk(name, export):
   with open('/home/boomsy/projects/firebase-server-update/resources/{0}.txt'.format(name), 'w') as f:
     f.write(json.dumps(export, separators=(',',':')))
+
+def writeLeagueListing(name, leagues):
+  leaguesJson = {}
+  for index, league in enumerate(leagues):
+    leaguesJson[leagues[index]['leagueid']] = league
+  with open('./resources/{0}.json'.format(name), 'w') as f:
+    f.write(json.dumps(leaguesJson, separators=(',',':')))
 
 # human readable league name, shoudl only be used once per new game
 def formatLeague(leagueId):
@@ -42,7 +49,7 @@ def formatLeague(leagueId):
 
         leagueListing = getLeagueListing['leagues']
         writeLeagueListing('leagues', leagueListing)
-        writeToDisk('LeagueListings', leagueListing)
+        # writeToDisk('LeagueListings', leagueListing)
         league = next(league for league in leagueListing if leagueId == league['leagueid'])
   except IOError:
     try:
@@ -54,10 +61,10 @@ def formatLeague(leagueId):
 
     leagueListing = getLeagueListing['leagues']
     writeLeagueListing('leagues', leagueListing)
-    writeToDisk('LeagueListings', leagueListing)
+    # writeToDisk('LeagueListings', leagueListing)
     league = next(league for league in leagueListing if leagueId == league['leagueid'])
 
-  writeToDisk('league', league)
+  # writeToDisk('league', league)
   league.pop('description');
   league.pop('itemdef');
 
@@ -250,7 +257,7 @@ def formatPlayers(selectedGame, callLeagueListing):
   selectedGame = sortOD(selectedGame)
   print('- sort object -')
 
-  writeToDisk('currentGame', selectedGame)
+  # writeToDisk('currentGame', selectedGame)
 
   print ('currentGame', sys.getsizeof(selectedGame))
 
