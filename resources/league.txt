@@ -1,1 +1,0 @@
-{"description":"Inhouse games for RD2L Season 10","leagueid":4786,"itemdef":17124,"name":"RD2L Season 10 IHL","tournament_url":"http://www.reddit.com/r/redditdota2league/"}

@@ -19,17 +19,88 @@ API = dota2api.Initialise(
   logging=True
 )
 
-#used for testing file content to be viewed in browser with python http server
+# writes the disk to json for later use
 def writeToDisk(name, export):
-  with open('/home/boomsy/projects/firebase-server-update/resources/{0}.txt'.format(name), 'w') as f:
-    f.write(json.dumps(export, separators=(',',':')))
+  with open('/home/boomsy/projects/firebase-server-update/resources/{0}.json'.format(name), 'w') as f:
+    json.dump(export, f)
+  print('+ wrote {0} to /home/boomsy/projects/firebase-server-update/resources/{0}.json +'.format(name))
 
-def writeLeagueListing(name, leagues):
+'''
+  update items/heroes/leagues Reference()
+    calls the api and creates new entries if any are needed
+'''
+# # updates json where items is stored
+def updateItemsReference():
+  try:
+    items = API.get_game_items();
+    items = items['items'];
+    print ('! finding new Item !')
+    DB.statusCode.save({'_id': 103, 'get_game_items': 'Up'})
+  except Exception:
+    DB.statusCode.save({'_id': 103, 'get_game_items': 'Down'})
+    print('! items api down !')
+    return {"0": { 'id': 0, 'url_image': '' } }
+
+  # add blank item
+  
+  itemJson = {};
+  itemJson[0] = {
+    'id': 0,
+    'url_image': '',
+    "recipe": 0
+  }
+
+  for index, item in enumerate(items):
+    if (item['recipe'] == 1):
+      item['url_image'] = 'http://cdn.dota2.com/apps/dota2/images/items/recipe_lg.png';
+    itemJson[items[index]['id']] = item
+
+  writeToDisk('items', itemJson)
+  return itemJson
+
+# updates json where  league is stored 
+def formatLeagueReference():
+  try:
+    getLeagueListing = API.get_league_listing()
+    print ('! finding new League !')
+    DB.statusCode.save({'_id': 101, 'get_league_listing': 'Up'})
+  except Exception:
+    DB.statusCode.save({'_id': 101, 'get_league_listing': 'Down'})
+    print('! league api down !')
+    return {}
+
   leaguesJson = {}
+  leagues = getLeagueListing['leagues']
   for index, league in enumerate(leagues):
     leaguesJson[leagues[index]['leagueid']] = league
-  with open('./resources/{0}.json'.format(name), 'w') as f:
-    f.write(json.dumps(leaguesJson, separators=(',',':')))
+
+  writeToDisk('leagues', leagueListing)
+  return leaguesJson
+
+# update json where heroes is stored
+def updateHeroesReference():
+  try:
+    heroes = API.get_heroes()
+    heroes = heroes['heroes'];
+    print ('! finding new Hero !')
+    DB.statusCode.save({'_id': 102, 'get_heroes': 'Up'})
+  except Exception:
+    DB.statusCode.save({'_id': 102, 'get_heroes': 'Down'})
+    print('! heroes api down !')
+    return {}
+    
+  heroJson = {}
+  heroJson[0] = {
+    "id": 0,
+    "url_large_portrait": ""
+  }
+
+  for index, hero in enumerate(heroes):
+    heroJson[heroes[index]['id']] = hero
+
+  writeToDisk('heroes', heroJson)
+  return heroJson
+
 
 # human readable league name, shoudl only be used once per new game
 def formatLeague(leagueId):
@@ -40,31 +111,22 @@ def formatLeague(leagueId):
       if str(leagueId) in league_data:
         league = league_data[str(leagueId)]
       else:
-        try:
-          getLeagueListing = API.get_league_listing()
-          DB.statusCode.save({'_id': 102, 'get_league_listing': 'Up'})
-        except Exception:
-          DB.statusCode.save({'_id': 102, 'get_league_listing': 'Down'})
-          return
+        # raise to run a grab a new file
+        raise FileNotFoundError
+  except FileNotFoundError:
+    # leagueListing = getLeagueListing['leagues']
+    # writeLeagueListing('leagues', leagueListing)
+    league_data = formatLeagueReference()
+    if league_data:
+      if str(leagueId) in league_data:
+        league = league_data[str(leagueId)]
+      else:
+        print('! league not found !')
+        return {}
+    else:
+      print('! league api down !')
+      return {}
 
-        leagueListing = getLeagueListing['leagues']
-        writeLeagueListing('leagues', leagueListing)
-        # writeToDisk('LeagueListings', leagueListing)
-        league = next(league for league in leagueListing if leagueId == league['leagueid'])
-  except IOError:
-    try:
-      getLeagueListing = API.get_league_listing()
-      DB.statusCode.save({'_id': 102, 'get_league_listing': 'Up'})
-    except Exception:
-      DB.statusCode.save({'_id': 102, 'get_league_listing': 'Down'})
-      return
-
-    leagueListing = getLeagueListing['leagues']
-    writeLeagueListing('leagues', leagueListing)
-    # writeToDisk('LeagueListings', leagueListing)
-    league = next(league for league in leagueListing if leagueId == league['leagueid'])
-
-  # writeToDisk('league', league)
   league.pop('description');
   league.pop('itemdef');
 
@@ -98,19 +160,36 @@ def nightDayCycle(duration):
 
 # change items to an array to easily pull from client
 def easyItems(player):
-  with open('/home/boomsy/projects/firebase-server-update/resources/items.json', 'r') as data_file:
-    item_data = json.load(data_file)
+  items = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5']
+  regex = re.compile('http://cdn.dota2.com/apps/dota2/images/items/([\w\d_]+)_lg.png')
+  try:
+    with open('/home/boomsy/projects/firebase-server-update/resources/items.json', 'r') as data_file:
+      item_data = json.load(data_file)
+      allItems = []
+      for item in items:
+        # using str() to read from json data
+        if str(player[item]) not in item_data:
+          raise FileNotFoundError
+        regexSearch = regex.search(item_data[str(player[item])]['url_image']);
+        if regexSearch:
+          allItems.append(regexSearch.group(1))
+        else:
+          allItems.append('None')
+  except FileNotFoundError:
     allItems = []
-    items = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5']
-    regex = re.compile('http://cdn.dota2.com/apps/dota2/images/items/([\w\d_]+)_lg.png')
+    item_data = updateItemsReference()
     for item in items:
       # using str() to read from json data
-      regexSearch = regex.search(item_data[str(player[item])]['url_image']);
+      if str(player[item]) not in item_data:
+        player[item] = 0
+      regexSearch = regex.search(item_data[player[item]]['url_image']);
       if regexSearch:
         allItems.append(regexSearch.group(1))
       else:
         allItems.append('None')
-      item_id = player.pop(item)
+  for item in items:
+    if item in player:
+      player.pop(item)
   return allItems
 
 # convert hero_id to hero name that works with link below so client can easily fetch
@@ -127,12 +206,26 @@ def easyHeroes(hero_id):
 
 # convert hero_id to hero name that works with link below so client can easily fetch
 def formatDraft(draft):
-  allDraft = []
-  with open('/home/boomsy/projects/firebase-server-update/resources/heroes.json', 'r') as data_file:
-    heroes_data = json.load(data_file)
+  # try to open file if it exists
+  try:
+    with open('/home/boomsy/projects/firebase-server-update/resources/heroes.json', 'r') as data_file:
+      allDraft = []
+      heroes_data = json.load(data_file)
+      for hero in draft:
+        if str(hero['hero_id']) not in heroes_data:
+          raise FileNotFoundError
+        regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
+        regexSearch = regex.search(heroes_data[str(hero['hero_id'])]['url_large_portrait']);
+        allDraft.append(regexSearch.group(1))
+  except FileNotFoundError:
+    print('! new Hero !')
+    allDraft = []
+    heroes_data = updateHeroesReference()
     for hero in draft:
+      if hero['hero_id'] not in heroes_data:
+        hero['hero_id'] = 0
       regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
-      regexSearch = regex.search(heroes_data[str(hero['hero_id'])]['url_large_portrait']);
+      regexSearch = regex.search(heroes_data[hero['hero_id']]['url_large_portrait']);
       allDraft.append(regexSearch.group(1))
   return allDraft
 
@@ -196,12 +289,14 @@ def formatPlayers(selectedGame, callLeagueListing):
   print ('+ draft +')
   if 'bans' in dire: 
     dire['bans'] = formatDraft(dire['bans'])
+  '''
   if 'picks' in dire: 
     dire['picks'] = formatDraft(dire['picks'])
   if 'bans' in radiant: 
     radiant['bans'] = formatDraft(radiant['bans'])
   if 'picks' in radiant:
     radiant['picks'] = formatDraft(radiant['picks'])
+  '''
   print ('- draft -')
 
   # format barracks and towers to correct
@@ -257,8 +352,6 @@ def formatPlayers(selectedGame, callLeagueListing):
   selectedGame = sortOD(selectedGame)
   print('- sort object -')
 
-  # writeToDisk('currentGame', selectedGame)
-
   print ('currentGame', sys.getsizeof(selectedGame))
 
   return selectedGame
@@ -279,9 +372,10 @@ def main():
 
   try:
     liveLeageGame = API.get_live_league_games()
-    DB.statusCode.save({'_id': 101, 'get_live_league_games': 'Up'})
+    DB.statusCode.save({'_id': 100, 'get_live_league_games': 'Up'})
+    DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': liveLeageGame})
   except Exception:
-    DB.statusCode.save({'_id': 101, 'get_live_league_games': 'Down'})
+    DB.statusCode.save({'_id': 100, 'get_live_league_games': 'Down'})
     return
   
   try:
@@ -303,8 +397,6 @@ def main():
         else:
           print ('probably in lobby')
 
-      # determine if league exists in old if it does replace
-
       leagueInfo = DB.currentGame.find_one({"_id": 1})
       # print (selectedGame['league_id'], leagueInfo['league']['league_id'])
       if leagueInfo:
@@ -320,18 +412,14 @@ def main():
           print ('+ callLeagueListing : True +')  
           callLeagueListing = True
     except Exception as e:
-      print('something broke after sorting live games')
+      print('broke after sorting live games')
       print (e)
       return
 
-    try:
-      selectedGame = formatPlayers(selectedGame, callLeagueListing)
-    except Exception as e:
-      print('formatPlayer failed')
-      print('error {0}'.format(e))
-      return
+    selectedGame = formatPlayers(selectedGame, callLeagueListing)
 
     try:
+      writeToDisk('currentGame', selectedGame)
       selectedGame['_id'] = 1
       _id = DB.currentGame.save(selectedGame)
     except Exception as e:
