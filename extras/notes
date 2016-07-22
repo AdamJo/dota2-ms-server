@@ -1,3 +1,0 @@
-# crontab notes
-@reboot sleep 30 && /usr/lib/node_modules/forever/bin/forever start -l /home/boomsy/.forever/firebase-server-update.log -a /home/boomsy/projects/firebase-server-update/firebase-server-update.js
-0 13 * * * tar -czvPf /home/boomsy/.forever/firebase-server-update.log.tar.gz /home/boomsy/.forever/firebase-server-update.log && truncate /home/boomsy/.forever/firebase-server-update.log --size 0

@@ -224,17 +224,6 @@ function main(currentGame) {
 
 var ITEMS;
 
-
-let config = {
-  //(TODO) change 'serviceAccount' on linux box
-  serviceAccount: "E:/Projects/firebase-server/dota2-project-d42951d006e1.json",
-  databaseURL: "https://dota2-project-c0fd5.firebaseio.com"
-};
-firebase.initializeApp(config);
-
-//var database = firebase.database();
-
-
 callLeagueListing = false;
 var global_db;
 var start = new Date().getTime();

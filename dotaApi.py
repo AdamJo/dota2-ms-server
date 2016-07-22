@@ -6,6 +6,8 @@ import time
 from pymongo import MongoClient
 import sys
 import re
+
+sys.path.append('../extras-dota2-ms/')
 import fileLocation
 
 # make DB and client global
