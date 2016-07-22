@@ -2,10 +2,10 @@ const firebase = require('firebase');
 const MongoClient = require('mongodb').MongoClient;
 const child_process = require('child_process');
 const CronJob = require('cron').CronJob;
-
+const local = require('./fileLocation').local;
 
 var config = {
-  serviceAccount: "/home/boomsy/projects/firebase-server-update/dota2-project.json",
+  serviceAccount: local+"dota2-project.json",
   databaseURL: "https://dota2-project-c0fd5.firebaseio.com"
 };
 firebase.initializeApp(config);
@@ -14,7 +14,7 @@ var database = firebase.database();
 
 function runPython() {
   console.log('- running python... -')
-  child_process.execSync('python3 /home/boomsy/projects/firebase-server-update/dotaApi.py', {timeout: 10000, stdio:[0,1,2]})
+  child_process.execSync('python '+local+'dotaApi.py', {timeout: 10000, stdio:[0,1,2]})
   console.log('+ Python completed! +')
 }
 
