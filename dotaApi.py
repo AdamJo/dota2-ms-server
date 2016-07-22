@@ -6,14 +6,11 @@ import time
 from pymongo import MongoClient
 import sys
 import re
+import fileLocation
 
 # make DB and client global
 CLIENT = MongoClient("mongodb://127.0.0.1:27017/")
 DB = CLIENT['dota']
-
-DB.key.find_one()['steam']
-
-
 API = dota2api.Initialise(
   DB.key.find_one()['steam'],
   logging=True
@@ -21,9 +18,9 @@ API = dota2api.Initialise(
 
 # writes the disk to json for later use
 def writeToDisk(name, export):
-  with open('/home/boomsy/projects/firebase-server-update/resources/{0}.json'.format(name), 'w') as f:
+  with open('{0}/{1}.json'.format(fileLocation.local, name), 'w') as f:
     json.dump(export, f)
-  print('+ wrote {0} to /home/boomsy/projects/firebase-server-update/resources/{0}.json +'.format(name))
+  print('+ wrote {0} to ./resources/{0}.json +'.format(name))
 
 '''
   update items/heroes/leagues Reference()
@@ -67,14 +64,14 @@ def formatLeagueReference():
   except Exception:
     DB.statusCode.save({'_id': 101, 'get_league_listing': 'Down'})
     print('! league api down !')
-    return {}
+    return {'league_id': 'None'}
 
   leaguesJson = {}
   leagues = getLeagueListing['leagues']
   for index, league in enumerate(leagues):
     leaguesJson[leagues[index]['leagueid']] = league
 
-  writeToDisk('leagues', leagueListing)
+  writeToDisk('leagues', leaguesJson)
   return leaguesJson
 
 # update json where heroes is stored
@@ -88,7 +85,7 @@ def updateHeroesReference():
     DB.statusCode.save({'_id': 102, 'get_heroes': 'Down'})
     print('! heroes api down !')
     return {}
-    
+
   heroJson = {}
   heroJson[0] = {
     "id": 0,
@@ -106,7 +103,7 @@ def updateHeroesReference():
 def formatLeague(leagueId):
   # if file doesn't exist go to league'
   try:
-    with open('/home/boomsy/projects/firebase-server-update/resources/leagues.json', 'r') as data_file:
+    with open('{}/leagues.json'.format(fileLocation.local), 'r') as data_file:
       league_data = json.load(data_file)
       if str(leagueId) in league_data:
         league = league_data[str(leagueId)]
@@ -122,10 +119,10 @@ def formatLeague(leagueId):
         league = league_data[str(leagueId)]
       else:
         print('! league not found !')
-        return {}
+        return {'league_id': 'None'}
     else:
       print('! league api down !')
-      return {}
+      return {'league_id': 'None'}
 
   league.pop('description');
   league.pop('itemdef');
@@ -163,7 +160,7 @@ def easyItems(player):
   items = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5']
   regex = re.compile('http://cdn.dota2.com/apps/dota2/images/items/([\w\d_]+)_lg.png')
   try:
-    with open('/home/boomsy/projects/firebase-server-update/resources/items.json', 'r') as data_file:
+    with open('{}/items.json'.format(fileLocation.local), 'r') as data_file:
       item_data = json.load(data_file)
       allItems = []
       for item in items:
@@ -194,7 +191,7 @@ def easyItems(player):
 
 # convert hero_id to hero name that works with link below so client can easily fetch
 def easyHeroes(hero_id):
-  with open('/home/boomsy/projects/firebase-server-update/resources/heroes.json', 'r') as data_file:
+  with open('{}/heroes.json'.format(fileLocation.local), 'r') as data_file:
     heroes_data = json.load(data_file)
     regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
     # using str() to read from json data
@@ -208,7 +205,7 @@ def easyHeroes(hero_id):
 def formatDraft(draft):
   # try to open file if it exists
   try:
-    with open('/home/boomsy/projects/firebase-server-update/resources/heroes.json', 'r') as data_file:
+    with open('{}/heroes.json'.format(fileLocation.local), 'r') as data_file:
       allDraft = []
       heroes_data = json.load(data_file)
       for hero in draft:
@@ -416,7 +413,12 @@ def main():
       print (e)
       return
 
-    selectedGame = formatPlayers(selectedGame, callLeagueListing)
+    try:
+      selectedGame = formatPlayers(selectedGame, callLeagueListing)
+    except Exception as e:
+      print ('format player failed')
+      print('error {0}'.format(e))
+      return
 
     try:
       writeToDisk('currentGame', selectedGame)

@@ -1,3 +1,5 @@
 /node_modules
 dota2-project-d42951d006e1.json
 .env
+fileLocation.py
+__pycache__
