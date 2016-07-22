@@ -1,12 +1,11 @@
 {
-  "name": "firebase-server",
+  "name": "dota2-minimap-spectator-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "node nodeDotaApi.js"
+    "start": "node main.js"
   },
-  "author": "",
+  "author": "AdamJo",
   "license": "ISC",
   "dependencies": {
     "cron": "^1.1.0",
