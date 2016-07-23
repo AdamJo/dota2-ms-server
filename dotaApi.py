@@ -6,9 +6,9 @@ import time
 from pymongo import MongoClient
 import sys
 import re
+import os
 
-sys.path.append('../extras-dota2-ms/')
-import fileLocation
+LOCAL = os.environ['SERVER']
 
 # make DB and client global
 CLIENT = MongoClient("mongodb://127.0.0.1:27017/")
@@ -20,7 +20,7 @@ API = dota2api.Initialise(
 
 # writes the disk to json for later use
 def writeToDisk(name, export):
-  with open('{0}/{1}.json'.format(fileLocation.local, name), 'w') as f:
+  with open('{0}/resources/{1}.json'.format(LOCAL, name), 'w') as f:
     json.dump(export, f)
   print('+ wrote {0} to ./resources/{0}.json +'.format(name))
 
@@ -105,7 +105,7 @@ def updateHeroesReference():
 def formatLeague(leagueId):
   # if file doesn't exist go to league'
   try:
-    with open('{}/leagues.json'.format(fileLocation.local), 'r') as data_file:
+    with open('{0}/resources/leagues.json'.format(LOCAL), 'r') as data_file:
       league_data = json.load(data_file)
       if str(leagueId) in league_data:
         league = league_data[str(leagueId)]
@@ -143,7 +143,7 @@ def formatLeagueTier(league_tier):
 
 # human readable series type
 def formatSeriesType(series_type):
-  seriesType = {0: 'None', 1: 'bo1', 2: 'bo3', 3: 'bo5'}
+  seriesType = {0: 'None', 1: 'bo3', 2: 'bo5'}
   series_type = seriesType[series_type]
   return series_type
 
@@ -162,7 +162,7 @@ def easyItems(player):
   items = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5']
   regex = re.compile('http://cdn.dota2.com/apps/dota2/images/items/([\w\d_]+)_lg.png')
   try:
-    with open('{}/items.json'.format(fileLocation.local), 'r') as data_file:
+    with open('{0}/resources/items.json'.format(LOCAL), 'r') as data_file:
       item_data = json.load(data_file)
       allItems = []
       for item in items:
@@ -193,7 +193,7 @@ def easyItems(player):
 
 # convert hero_id to hero name that works with link below so client can easily fetch
 def easyHeroes(hero_id):
-  with open('{}/heroes.json'.format(fileLocation.local), 'r') as data_file:
+  with open('{0}/resources/heroes.json'.format(LOCAL), 'r') as data_file:
     heroes_data = json.load(data_file)
     regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
     # using str() to read from json data
@@ -207,7 +207,7 @@ def easyHeroes(hero_id):
 def formatDraft(draft):
   # try to open file if it exists
   try:
-    with open('{}/heroes.json'.format(fileLocation.local), 'r') as data_file:
+    with open('{0}/resources/heroes.json'.format(LOCAL), 'r') as data_file:
       allDraft = []
       heroes_data = json.load(data_file)
       for hero in draft:
@@ -372,7 +372,6 @@ def main():
   try:
     liveLeageGame = API.get_live_league_games()
     DB.statusCode.save({'_id': 100, 'get_live_league_games': 'Up'})
-    DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': liveLeageGame})
   except Exception:
     DB.statusCode.save({'_id': 100, 'get_live_league_games': 'Down'})
     return
@@ -392,12 +391,12 @@ def main():
         if 'scoreboard' in game:
           #if game['scoreboard']['duration'] > 60:
           selectedGame = sortedGamesBySpectators[index]
+          DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': selectedGame})
           break
         else:
           print ('probably in lobby')
 
       leagueInfo = DB.currentGame.find_one({"_id": 1})
-      # print (selectedGame['league_id'], leagueInfo['league']['league_id'])
       if leagueInfo:
         if 'league' in leagueInfo and 'league_id' in selectedGame:
           if selectedGame['league_id'] == leagueInfo['league']['league_id']:
