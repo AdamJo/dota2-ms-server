@@ -2,22 +2,18 @@ const firebase = require('firebase');
 const MongoClient = require('mongodb').MongoClient;
 const child_process = require('child_process');
 const CronJob = require('cron').CronJob;
-const local = require('../extras-dota2-ms/fileLocation').local;
-const firebaseLocal = require('../extras-dota2-ms/fileLocation').firebaseLocal;
-const firebaseDatabaseUrl = require('../extras-dota2-ms/fileLocation').firebaseDatabaseUrl;
 
 var config = {
-  serviceAccount: firebaseLocal,
-  databaseURL: firebaseDatabaseUrl
+  serviceAccount: process.env.FIREBASE_LOCAL,
+  databaseURL: process.env.FIREBASE_DATABASE_URL
 };
 firebase.initializeApp(config);
 
-console.log(firebaseLocal)
 var database = firebase.database();
 
 function runPython() {
   console.log('- running python... -');
-  child_process.execSync('python '+ local +'dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
+  child_process.execSync('python3 '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
   console.log('+ Python completed! +');
 }
 
