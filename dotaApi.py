@@ -234,8 +234,12 @@ def popUnused(selectedGame):
   selectedGame.pop('lobby_id')
   selectedGame.pop('league_series_id')
   selectedGame.pop('series_id')
-  selectedGame['scoreboard']['dire'].pop('abilities')
-  selectedGame['scoreboard']['radiant'].pop('abilities')
+  if 'scoreboard' in selectedGame:
+    if 'dire' in selectedGame:
+      selectedGame['scoreboard']['dire'].pop('abilities')
+    if 'radiant' in selectedGame:
+      selectedGame['scoreboard']['radiant'].pop('abilities')
+
   return selectedGame
 
 # switches barracks/tower to binary format, 1 is true, 0 is false
