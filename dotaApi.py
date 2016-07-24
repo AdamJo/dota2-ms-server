@@ -329,7 +329,6 @@ def formatPlayers(selectedGame, callLeagueListing):
           dire['players'][i]['position_y'] = int(dire['players'][i]['position_y'])
           dire['players'][i]['items'] = easyItems(dire['players'][i])
           dire['players'][i]['hero'] = easyHeroes(dire['players'][i]['hero_id'])
-          dire['players'][i].pop('hero_id')
           dire['players'][i]['name'] = player['name']
       for i, p in enumerate(radiant['players']):
         team = 'radiant'
@@ -338,7 +337,6 @@ def formatPlayers(selectedGame, callLeagueListing):
           radiant['players'][i]['position_y'] = int(radiant['players'][i]['position_y'])
           radiant['players'][i]['items'] = easyItems(radiant['players'][i])
           radiant['players'][i]['hero'] = easyHeroes(radiant['players'][i]['hero_id'])
-          radiant['players'][i].pop('hero_id')
           radiant['players'][i]['name'] = player['name']
     print('- player format -')
     # only used player name from players and that is now in the scoreboard
