@@ -235,10 +235,12 @@ def popUnused(selectedGame):
   selectedGame.pop('league_series_id')
   selectedGame.pop('series_id')
   if 'scoreboard' in selectedGame:
-    if 'dire' in selectedGame:
-      selectedGame['scoreboard']['dire'].pop('abilities')
-    if 'radiant' in selectedGame:
-      selectedGame['scoreboard']['radiant'].pop('abilities')
+    if 'dire' in selectedGame['scoreboard']:
+      if 'abilities' in selectedGame['scoreboard']['dire']:
+        selectedGame['scoreboard']['dire'].pop('abilities')
+    if 'radiant' in selectedGame['scoreboard']:
+      if 'abilities' in selectedGame['scoreboard']['radiant']:
+        selectedGame['scoreboard']['radiant'].pop('abilities')
 
   return selectedGame
 
