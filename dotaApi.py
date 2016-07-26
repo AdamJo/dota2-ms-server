@@ -294,14 +294,12 @@ def formatPlayers(selectedGame, callLeagueListing):
   print ('+ draft +')
   if 'bans' in dire: 
     dire['bans'] = formatDraft(dire['bans'])
-  '''
   if 'picks' in dire: 
     dire['picks'] = formatDraft(dire['picks'])
   if 'bans' in radiant: 
     radiant['bans'] = formatDraft(radiant['bans'])
   if 'picks' in radiant:
     radiant['picks'] = formatDraft(radiant['picks'])
-  '''
   print ('- draft -')
 
   # format barracks and towers to correct
