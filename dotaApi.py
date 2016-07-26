@@ -101,7 +101,7 @@ def updateHeroesReference():
   return heroJson
 
 
-# human readable league name, shoudl only be used once per new game
+# human readable league name, should only be used once per new game
 def formatLeague(leagueId):
   # if file doesn't exist go to league'
   try:
@@ -323,7 +323,6 @@ def formatPlayers(selectedGame, callLeagueListing):
     print('+ player format +')
     for player in selectedGame['players']:
       for i, p in enumerate(dire['players']):
-        team = 'dire'
         if player['account_id'] == p['account_id']:
           dire['players'][i]['position_x'] = int(dire['players'][i]['position_x'])
           dire['players'][i]['position_y'] = int(dire['players'][i]['position_y'])
@@ -331,7 +330,6 @@ def formatPlayers(selectedGame, callLeagueListing):
           dire['players'][i]['hero'] = easyHeroes(dire['players'][i]['hero_id'])
           dire['players'][i]['name'] = player['name']
       for i, p in enumerate(radiant['players']):
-        team = 'radiant'
         if player['account_id'] == p['account_id']:
           radiant['players'][i]['position_x'] = int(radiant['players'][i]['position_x'])
           radiant['players'][i]['position_y'] = int(radiant['players'][i]['position_y'])
@@ -341,14 +339,25 @@ def formatPlayers(selectedGame, callLeagueListing):
     print('- player format -')
     # only used player name from players and that is now in the scoreboard
 
-    print('+ pop unused +')
-    selectedGame = popUnused(selectedGame)
-    print('- pop unused -')
   else:
-    print('game not started')
+    # add player name to scoreboard dictionary
+    print('@ game not started @')
+    print('+ player format +')
+    for player in selectedGame['players']:
+      for i, p in enumerate(dire['players']):
+        if player['account_id'] == p['account_id']:
+          dire['players'][i]['name'] = player['name']
+      for i, p in enumerate(radiant['players']):
+        if player['account_id'] == p['account_id']:
+          radiant['players'][i]['name'] = player['name']
+    print('- player format -')
 
   # makes it easier and more consistent to read output
 
+  print('+ pop unused +')
+  selectedGame = popUnused(selectedGame)
+  print('- pop unused -')
+  
   print('+ sort object +')
   selectedGame = sortOD(selectedGame)
   print('- sort object -')
