@@ -285,9 +285,13 @@ def formatPlayers(selectedGame, callLeagueListing):
   if 'radiant_team' in selectedGame:
     selectedGame['radiant_team_name'] = selectedGame['radiant_team']['team_name']
     selectedGame.pop('radiant_team')
+  else:
+    selectedGame['radiant_team_name'] = ''
   if 'dire_team' in selectedGame:
     selectedGame['dire_team_name'] = selectedGame['dire_team']['team_name']
     selectedGame.pop('dire_team')
+  else:
+    selectedGame['dire_team_name'] = ''
   print('- team -')
 
   # format draft
