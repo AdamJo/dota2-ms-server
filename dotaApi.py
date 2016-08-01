@@ -283,15 +283,23 @@ def formatPlayers(selectedGame, callLeagueListing):
   # pictures API seems to be broken in some way
   print('+ team +')
   if 'radiant_team' in selectedGame:
-    selectedGame['radiant_team_name'] = selectedGame['radiant_team']['team_name']
-    selectedGame.pop('radiant_team')
+    if len(selectedGame['radiant_team']['team_name']) > 0:
+      selectedGame['radiant_team_name'] = selectedGame['radiant_team']['team_name']
+      selectedGame.pop('radiant_team')
+    else:
+      selectedGame['radiant_team_name'] = 'Radiant'
+      selectedGame.pop('radiant_team')
   else:
-    selectedGame['radiant_team_name'] = ''
+    selectedGame['radiant_team_name'] = 'Radiant'
   if 'dire_team' in selectedGame:
-    selectedGame['dire_team_name'] = selectedGame['dire_team']['team_name']
-    selectedGame.pop('dire_team')
+    if len(selectedGame['dire_team']['team_name']) > 0:
+      selectedGame['dire_team_name'] = selectedGame['dire_team']['team_name']
+      selectedGame.pop('dire_team')
+    else:
+      selectedGame['dire_team_name'] = 'Dire'
+      selectedGame.pop('dire_team')
   else:
-    selectedGame['dire_team_name'] = ''
+    selectedGame['dire_team_name'] = 'Dire'
   print('- team -')
 
   # format draft
