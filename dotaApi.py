@@ -226,6 +226,8 @@ def formatDraft(draft):
       regex = re.compile('http://cdn.dota2.com/apps/dota2/images/heroes/([\w\d_]+)_lg.png')
       regexSearch = regex.search(heroes_data[hero['hero_id']]['url_large_portrait']);
       allDraft.append(regexSearch.group(1))
+
+  allDraft = allDraft + [-1]*(5 - len(allDraft))
   return allDraft
 
 # remove unneeded values in json
