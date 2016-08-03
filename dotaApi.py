@@ -266,7 +266,7 @@ def formatPlayers(selectedGame, callLeagueListing):
   if callLeagueListing:
     print('+ formatLeague +')
     selectedGame['league'] = formatLeague(selectedGame['league_id'])
-    selectedGame.pop('league_id')
+    # selectedGame.pop('league_id')
     print('- formatLeague -')
 
   # LEAGUE_TIER
@@ -306,14 +306,27 @@ def formatPlayers(selectedGame, callLeagueListing):
 
   # format draft
   print ('+ draft +')
+
   if 'bans' in dire: 
     dire['bans'] = formatDraft(dire['bans'])
+  else:
+    dire['bans'] = [-1, -1, -1, -1, -1]
+
   if 'picks' in dire: 
     dire['picks'] = formatDraft(dire['picks'])
+  else:
+    dire['picks'] = [-1, -1, -1, -1, -1]
+
   if 'bans' in radiant: 
     radiant['bans'] = formatDraft(radiant['bans'])
+  else:
+    radiant['bans'] = [-1, -1, -1, -1, -1]
+
   if 'picks' in radiant:
     radiant['picks'] = formatDraft(radiant['picks'])
+  else:
+    radiant['picks'] = [-1, -1, -1, -1, -1]
+
   print ('- draft -')
 
   # format barracks and towers to correct
@@ -427,7 +440,7 @@ def main():
           if selectedGame['league_id'] == leagueInfo['league']['league_id']:
             print ('+ callLeagueListing : False +') 
             selectedGame['league'] = leagueInfo['league'];
-            selectedGame.pop('league_id')
+            # selectedGame.pop('league_id')
           else:
             print ('+ callLeagueListing : True +') 
             callLeagueListing = True

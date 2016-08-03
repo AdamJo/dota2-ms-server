@@ -32,7 +32,7 @@ function updateDatabase() {
 
         //not needed for web client
         delete doc._id;
-        delete doc.league.league_id;
+        // delete doc.league.league_id;
 
         database.ref('currentGame').set(doc);
         console.log("- updated data to firebase -");
