@@ -52,6 +52,6 @@ function updateDatabase() {
 // null : time zone
 // null : context e.g. this.stop()
 // true : immediately fire the job on startup
-new CronJob('*/16 * * * * *', () => {
+new CronJob('*/5 * * * * *', () => {
 	updateDatabase()
 }, null, true, null, null, true);
