@@ -143,7 +143,7 @@ def formatLeagueTier(league_tier):
 
 # human readable series type
 def formatSeriesType(series_type):
-  seriesType = {0: 'None', 1: 'bo3', 2: 'bo5'}
+  seriesType = {0: 1, 1: 2, 2: 3}
   series_type = seriesType[series_type]
   return series_type
 
@@ -277,8 +277,14 @@ def formatPlayers(selectedGame, callLeagueListing):
 
   # SERIES
   print('+ series type +')
-  if 'series_type' in selectedGame:
+  if 'series_type' in selectedGame and 'dire_series_wins' in selectedGame and 'radiant_series_wins' in selectedGame:
     selectedGame['series_type'] = formatSeriesType(selectedGame['series_type'])
+    selectedGame['series'] = { 
+      'series_type': selectedGame['series_type'],
+      'dire_series_wins': selectedGame['dire_series_wins'],
+      'radiant_series_wins': selectedGame['radiant_series_wins']
+    }
+
   print('- series type -')
   # TEAM 
   # since I can't get all the pictures I'll do this for now
