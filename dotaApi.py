@@ -41,7 +41,7 @@ def updateItemsReference():
     return {"0": { 'id': 0, 'url_image': '' } }
 
   # add blank item
-  
+
   itemJson = {};
   itemJson[0] = {
     'id': 0,
@@ -260,6 +260,16 @@ def formatObjectives(scoreboard):
   scoreboard['radiant']['tower_state'] = "{0:11b}".format(scoreboard['radiant']['tower_state'])
   return scoreboard
 
+def didGameStart(scoreboard):
+  for player in scoreboard['dire']['players']:
+    if (player['hero_id'] == 0):
+      return False
+  for player in scoreboard['radiant']['players']:
+    if (player['hero_id'] == 0):
+      return False
+  return True;
+  
+
 # organize player and tournament information
 def formatPlayers(selectedGame, callLeagueListing):
   
@@ -340,12 +350,13 @@ def formatPlayers(selectedGame, callLeagueListing):
 
   # format barracks and towers to correct
   scoreboard = formatObjectives(scoreboard)
+  scoreboard['did_game_start'] = didGameStart(scoreboard)
 
   # game has started
   # duration is in milliseconds
   # else in drafting phase and nothing needs to be done
-  if scoreboard['duration'] > 0:
-    
+  if scoreboard['did_game_start']:
+
     print('+ time +')
     # just returns seconds / normally seconds and milliseconds
     scoreboard['roshan_respawn_timer'] = int(scoreboard['roshan_respawn_timer'])
