@@ -142,10 +142,15 @@ def formatLeagueTier(league_tier):
   return league_tier
 
 # human readable series type
-def formatSeriesType(series_type):
+def formatSeriesType(seriesTypeWins, wins):
+  series = []
   seriesType = {0: 1, 1: 2, 2: 3}
-  series_type = seriesType[series_type]
-  return series_type
+  seriesTypes = seriesType[seriesTypeWins]
+
+  series = [-1]*(seriesTypes)
+  for x in range(wins):
+    series[x] = 1;
+  return series
 
 # used to change map on client side
 def nightDayCycle(duration):
@@ -278,11 +283,9 @@ def formatPlayers(selectedGame, callLeagueListing):
   # SERIES
   print('+ series type +')
   if 'series_type' in selectedGame and 'dire_series_wins' in selectedGame and 'radiant_series_wins' in selectedGame:
-    selectedGame['series_type'] = formatSeriesType(selectedGame['series_type'])
     selectedGame['series'] = { 
-      'series_type': selectedGame['series_type'],
-      'dire_series_wins': selectedGame['dire_series_wins'],
-      'radiant_series_wins': selectedGame['radiant_series_wins']
+      'dire_series_wins': formatSeriesType(selectedGame['series_type'], selectedGame['dire_series_wins']),
+      'radiant_series_wins': formatSeriesType(selectedGame['series_type'], selectedGame['radiant_series_wins'])
     }
 
   print('- series type -')
