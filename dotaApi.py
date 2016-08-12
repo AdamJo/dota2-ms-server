@@ -272,7 +272,7 @@ def didGameStart(scoreboard):
 
 # organize player and tournament information
 def formatPlayers(selectedGame, callLeagueListing):
-  
+
   scoreboard = selectedGame['scoreboard']
   dire = selectedGame['scoreboard']['dire']
   radiant = selectedGame['scoreboard']['radiant']
@@ -285,10 +285,10 @@ def formatPlayers(selectedGame, callLeagueListing):
     print('- formatLeague -')
 
   # LEAGUE_TIER
-  print('+ league tier +')
-  if 'league_tier' in selectedGame:
-    selectedGame['league_tier'] = formatLeagueTier(selectedGame['league_tier'])
-  print('- league tier -')
+  # print('+ league tier +')
+  # if 'league_tier' in selectedGame:
+  #   selectedGame['league_tier'] = formatLeagueTier(selectedGame['league_tier'])
+  # print('- league tier -')
 
   # SERIES
   print('+ series type +')
@@ -325,7 +325,7 @@ def formatPlayers(selectedGame, callLeagueListing):
 
   # format draft
   print ('+ draft +')
-
+  print (dire['bans'])
   if 'bans' in dire: 
     dire['bans'] = formatDraft(dire['bans'])
   else:
@@ -351,7 +351,6 @@ def formatPlayers(selectedGame, callLeagueListing):
   # format barracks and towers to correct
   scoreboard = formatObjectives(scoreboard)
   scoreboard['did_game_start'] = didGameStart(scoreboard)
-
   # game has started
   # duration is in milliseconds
   # else in drafting phase and nothing needs to be done
@@ -426,6 +425,7 @@ def sortOD(od):
 def main():
 
   callLeagueListing = False
+  count = 0;
 
   try:
     liveLeageGame = API.get_live_league_games()
@@ -436,57 +436,61 @@ def main():
   
   try:
     # sort list by spectators
-    sortedGamesBySpectators = sorted(liveLeageGame['games'], key=itemgetter('spectators'), reverse=True)
+    sortedGamesBySpectators = sorted(liveLeageGame['games'], key=itemgetter('league_tier', 'spectators'), reverse=True)
+    writeToDisk('gamesSorted', sortedGamesBySpectators)
   except Exception as e:
     print('sort by spectators failed')
     print ('error {0}'.format(e))
     return
 
+  print(len(sortedGamesBySpectators))
   # if this fails then something went wrong with the api call and don't run the program
   if len(sortedGamesBySpectators) > 0:
-    try:
-      for (index, game) in enumerate(sortedGamesBySpectators):
-        if 'scoreboard' in game:
-          #if game['scoreboard']['duration'] > 60:
-          selectedGame = sortedGamesBySpectators[index]
-          DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': selectedGame})
-          break
-        else:
-          print ('probably in lobby')
+    for index, game in enumerate(sortedGamesBySpectators):
+      print(str(index) + 'tested')
+      if 'scoreboard' in sortedGamesBySpectators[index]:
+        print(str(index) + 'testing')
+        selectedGame = sortedGamesBySpectators[index]
+        # DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': selectedGame})
 
-      leagueInfo = DB.currentGame.find_one({"_id": 1})
-      if leagueInfo:
-        if 'league' in leagueInfo and 'league_id' in selectedGame:
-          if selectedGame['league_id'] == leagueInfo['league']['league_id']:
-            print ('+ callLeagueListing : False +') 
-            selectedGame['league'] = leagueInfo['league'];
-            # selectedGame.pop('league_id')
+        leagueInfo = DB.currentGame.find_one({"_id": 1})
+        if leagueInfo:
+          if 'league' in leagueInfo and 'league_id' in selectedGame:
+            if selectedGame['league_id'] == leagueInfo['league']['league_id']:
+              print ('+ callLeagueListing : False +') 
+              selectedGame['league'] = leagueInfo['league']
+              callLeagueListing = False
+            else:
+              print ('+ callLeagueListing : True +') 
+              callLeagueListing = True
           else:
-            print ('+ callLeagueListing : True +') 
+            print ('+ callLeagueListing : True +')  
             callLeagueListing = True
-        else:
-          print ('+ callLeagueListing : True +')  
-          callLeagueListing = True
-    except Exception as e:
-      print('broke after sorting live games')
-      print (e)
-      return
 
-    try:
-      selectedGame = formatPlayers(selectedGame, callLeagueListing)
-    except Exception as e:
-      print ('format player failed')
-      print('error {0}'.format(e))
-      return
+        selectedGame = formatPlayers(selectedGame, callLeagueListing)
 
-    try:
-      writeToDisk('currentGame', selectedGame)
-      selectedGame['_id'] = 1
-      _id = DB.currentGame.save(selectedGame)
-    except Exception as e:
-      print('mongodb save failed')
-      print('error {0}'.format(e))
-      return
+        try:
+          # writeToDisk('currentGame', selectedGame)
+          print (selectedGame['league_tier'])
+          if selectedGame['league_tier'] == 3:
+            selectedGame['_id'] = selectedGame['match_id']
+            _id = DB.premier.save(selectedGame)
+          elif selectedGame['league_tier'] == 2:
+            selectedGame['_id'] = selectedGame['match_id']
+            _id = DB.professional.save(selectedGame)
+          else:
+            selectedGame['_id'] = selectedGame['match_id']
+            _id = DB.amateur.save(selectedGame)
+          
+          count += 1
+          if count == 4:
+            return
+              
+
+        except Exception as e:
+          print('mongodb save failed')
+          print('error {0}'.format(e))
+          return
   else:
     print('game length < 0')
 
