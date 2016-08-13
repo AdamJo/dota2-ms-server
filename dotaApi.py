@@ -281,11 +281,11 @@ def formatPlayers(selectedGame, callLeagueListing):
   radiant = selectedGame['scoreboard']['radiant']
 
   # replace league_id with league info, only calls if does not exist in current one.
-  if callLeagueListing:
-    print('+ formatLeague +')
-    selectedGame['league'] = formatLeague(selectedGame['league_id'])
-    # selectedGame.pop('league_id')
-    print('- formatLeague -')
+  # if callLeagueListing:
+  print('+ formatLeague +')
+  selectedGame['league'] = formatLeague(selectedGame['league_id'])
+  # selectedGame.pop('league_id')
+  print('- formatLeague -')
 
   # LEAGUE_TIER
   # print('+ league tier +')
@@ -449,25 +449,23 @@ def pullPlayers():
   # if this fails then something went wrong with the api call and don't run the program
   if len(sortedGamesBySpectators) > 0:
     for index, game in enumerate(sortedGamesBySpectators):
-      print(str(index) + 'tested')
       if 'scoreboard' in sortedGamesBySpectators[index]:
-        print(str(index) + 'testing')
         selectedGame = sortedGamesBySpectators[index]
         # DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': selectedGame})
 
-        leagueInfo = DB.currentGame.find_one({"_id": 1})
-        if leagueInfo:
-          if 'league' in leagueInfo and 'league_id' in selectedGame:
-            if selectedGame['league_id'] == leagueInfo['league']['league_id']:
-              print ('+ callLeagueListing : False +') 
-              selectedGame['league'] = leagueInfo['league']
-              callLeagueListing = False
-            else:
-              print ('+ callLeagueListing : True +') 
-              callLeagueListing = True
-          else:
-            print ('+ callLeagueListing : True +')  
-            callLeagueListing = True
+        # leagueInfo = DB.currentGame.find_one({"_id": 1})
+        # if leagueInfo:
+        #   if 'league' in leagueInfo and 'league_id' in selectedGame:
+        #     if selectedGame['league_id'] == leagueInfo['league']['league_id']:
+        #       print ('+ callLeagueListing : False +') 
+        #       selectedGame['league'] = leagueInfo['league']
+        #       callLeagueListing = False
+        #     else:
+        #       print ('+ callLeagueListing : True +') 
+        #       callLeagueListing = True
+        #   else:
+        #     print ('+ callLeagueListing : True +')  
+        #     callLeagueListing = True
 
         selectedGame = formatPlayers(selectedGame, callLeagueListing)
 

@@ -18,7 +18,7 @@ function runPython() {
 }
 
 function updateDatabase() {
-
+  allGames = []
   MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
     if(!err) {
 
@@ -30,11 +30,11 @@ function updateDatabase() {
       cursor.each((err, doc) => {
           if (doc != null) {
             delete doc._id;
-            matchId = doc['match_id']
-            games[matchId] = doc
+            // matchId = doc['match_id']
+            // games[matchId] = doc
+            allGames.push(doc)
           } else {
-            database.ref('topGames').set(games);
-            
+            database.ref('topGames').set(allGames);
             let collection = db.collection('currentGame');
             collection.findOne({'_id': 1}, (err, doc) => {
               console.log("+ updating data to firebase +");
