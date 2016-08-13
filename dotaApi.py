@@ -18,6 +18,9 @@ API = dota2api.Initialise(
   logging=True
 )
 
+All_GAMES = []
+NEW_GAMES = []
+
 # writes the disk to json for later use
 def writeToDisk(name, export):
   with open('{0}/resources/{1}.json'.format(LOCAL, name), 'w') as f:
@@ -325,7 +328,6 @@ def formatPlayers(selectedGame, callLeagueListing):
 
   # format draft
   print ('+ draft +')
-  print (dire['bans'])
   if 'bans' in dire: 
     dire['bans'] = formatDraft(dire['bans'])
   else:
@@ -422,7 +424,7 @@ def sortOD(od):
             res[k] = v
     return res
 
-def main():
+def pullPlayers():
 
   callLeagueListing = False
   count = 0;
@@ -437,7 +439,7 @@ def main():
   try:
     # sort list by spectators
     sortedGamesBySpectators = sorted(liveLeageGame['games'], key=itemgetter('league_tier', 'spectators'), reverse=True)
-    writeToDisk('gamesSorted', sortedGamesBySpectators)
+    # writeToDisk('gamesSorted', sortedGamesBySpectators)
   except Exception as e:
     print('sort by spectators failed')
     print ('error {0}'.format(e))
@@ -471,22 +473,13 @@ def main():
 
         try:
           # writeToDisk('currentGame', selectedGame)
-          print (selectedGame['league_tier'])
-          if selectedGame['league_tier'] == 3:
-            selectedGame['_id'] = selectedGame['match_id']
-            _id = DB.premier.save(selectedGame)
-          elif selectedGame['league_tier'] == 2:
-            selectedGame['_id'] = selectedGame['match_id']
-            _id = DB.professional.save(selectedGame)
-          else:
-            selectedGame['_id'] = selectedGame['match_id']
-            _id = DB.amateur.save(selectedGame)
-          
+          NEW_GAMES.append(selectedGame['match_id'])
+          selectedGame['_id'] = selectedGame['match_id']
+          DB.topGames.save(selectedGame)
+          # print(_id)
           count += 1
-          if count == 4:
+          if count == 5:
             return
-              
-
         except Exception as e:
           print('mongodb save failed')
           print('error {0}'.format(e))
@@ -495,7 +488,15 @@ def main():
     print('game length < 0')
 
 if __name__ == '__main__':
+  removeGames = []
   start_time = time.time()
-  main()
+  All_GAMES = DB.topGames.find()
+  pullPlayers()
+  # for x in All_GAMES:
+  #   print(x['match_id'])
+  for games in All_GAMES:
+    if games['match_id'] not in NEW_GAMES:
+      DB.topGames.delete_one({'_id': games['match_id']})
+
   print("--- %s seconds ---" % (time.time() - start_time))
   CLIENT.close()
