@@ -13,7 +13,7 @@ var database = firebase.database();
 
 function runPython() {
   console.log('- running python... -');
-  child_process.execSync('python3 '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
+  child_process.execSync('python '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
   console.log('+ Python completed! +');
 }
 
@@ -34,20 +34,22 @@ function updateDatabase() {
             // games[matchId] = doc
             allGames.push(doc)
           } else {
-            database.ref('topGames').set(allGames);
-            let collection = db.collection('currentGame');
-            collection.findOne({'_id': 1}, (err, doc) => {
-              console.log("+ updating data to firebase +");
+            database.ref('sortedGames').set(allGames);
+            db.close();
+            // database.ref('topGames').set(games);
+            // let collection = db.collection('currentGame');
+            // collection.findOne({'_id': 1}, (err, doc) => {
+            //   console.log("+ updating data to firebase +");
 
-              //not needed for web client
-              delete doc._id;
-              // delete doc.league.league_id;
+            //   //not needed for web client
+            //   delete doc._id;
+            //   // delete doc.league.league_id;
 
-              database.ref('currentGame').set(doc);
-              console.log("- updated data to firebase -");
+            //   database.ref('currentGame').set(doc);
+            //   console.log("- updated data to firebase -");
 
-              db.close();
-            });
+            //   db.close();
+            // });
           }
         })
     } else {
