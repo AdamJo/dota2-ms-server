@@ -30,26 +30,10 @@ function updateDatabase() {
       cursor.each((err, doc) => {
           if (doc != null) {
             delete doc._id;
-            // matchId = doc['match_id']
-            // games[matchId] = doc
             allGames.push(doc)
           } else {
             database.ref('sortedGames').set(allGames);
             db.close();
-            // database.ref('topGames').set(games);
-            // let collection = db.collection('currentGame');
-            // collection.findOne({'_id': 1}, (err, doc) => {
-            //   console.log("+ updating data to firebase +");
-
-            //   //not needed for web client
-            //   delete doc._id;
-            //   // delete doc.league.league_id;
-
-            //   database.ref('currentGame').set(doc);
-            //   console.log("- updated data to firebase -");
-
-            //   db.close();
-            // });
           }
         })
     } else {
