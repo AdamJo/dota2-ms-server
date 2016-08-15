@@ -13,7 +13,7 @@ var database = firebase.database();
 
 function runPython() {
   console.log('- running python... -');
-  child_process.execSync('python '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
+  child_process.execSync('python3 '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
   console.log('+ Python completed! +');
 }
 
