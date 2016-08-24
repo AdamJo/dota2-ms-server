@@ -30,6 +30,15 @@ function updateDatabase() {
       cursor.each((err, doc) => {
           if (doc != null) {
             delete doc._id;
+            delete doc.dire_series_wins;
+            delete doc.game_number;
+            delete doc.league_game_id;
+            delete doc.league_id;
+            delete doc.league_tier;
+            delete doc.radiant_series_wins;
+            delete doc.stage_name;
+            delete doc.series_type;
+
             allGames.push(doc)
           } else {
             database.ref('sortedGames').set(allGames);
