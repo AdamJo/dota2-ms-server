@@ -488,15 +488,11 @@ def pullPlayers():
     print('game length < 0')
 
 if __name__ == '__main__':
-  removeGames = []
   start_time = time.time()
   All_GAMES = DB.topGames.find()
   pullPlayers()
-  # for x in All_GAMES:
-  #   print(x['match_id'])
   for games in All_GAMES:
     if games['match_id'] not in NEW_GAMES:
       DB.topGames.delete_one({'_id': games['match_id']})
-
   print("--- %s seconds ---" % (time.time() - start_time))
   CLIENT.close()
