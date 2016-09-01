@@ -168,6 +168,7 @@ def nightDayCycle(duration):
 # change items to an array to easily pull from client
 def easyItems(player):
   items = ['item0', 'item1', 'item2', 'item3', 'item4', 'item5']
+  vials = [1025, 1026, 1027, 1024, 1021, 1022, 1023];
   regex = re.compile('http://cdn.dota2.com/apps/dota2/images/items/([\w\d_]+)_lg.png')
   try:
     with open('{0}/resources/items.json'.format(LOCAL), 'r') as data_file:
@@ -179,7 +180,10 @@ def easyItems(player):
           raise FileNotFoundError
         regexSearch = regex.search(item_data[str(player[item])]['url_image']);
         if regexSearch:
-          allItems.append(regexSearch.group(1))
+          if player[item] in vials:
+            allItems.append('None')
+          else:
+            allItems.append(regexSearch.group(1))
         else:
           allItems.append('None')
   except FileNotFoundError:
@@ -197,6 +201,7 @@ def easyItems(player):
   for item in items:
     if item in player:
       player.pop(item)
+
   return allItems
 
 # convert hero_id to hero name that works with link below so client can easily fetch
