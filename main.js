@@ -90,6 +90,13 @@ function updateDatabase() {
 
             allGames.push(doc)
           } else {
+	    allGames.sort((a, b) => {
+              if (a.spectators > b.spectators)
+                return -1;
+              if (a.spectators < b.spectators)
+                return 1;
+              return 0;
+            })
             DATABASE.ref('sortedGames').set(allGames);
             db.close();
           }
@@ -119,7 +126,7 @@ getUpcomingGamesJob = new CronJob({
 });
 
 updateDatabaseJob = new CronJob({
-  cronTime: '*/5 * * * * *',
+  cronTime: '*/8 * * * * *',
   onTick: () => {
 	  updateDatabase()
   },
