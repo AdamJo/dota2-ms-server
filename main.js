@@ -6,8 +6,9 @@ const request = require('request');
 
 function runPython() {
   console.log('- running python... -');
-  child_process.execSync('python3 '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
+  child_process.execSync('python '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
   console.log('+ Python completed! +');
+  return 'update Run Python Done'
 }
 
 function getUpcomingGames() {
@@ -60,52 +61,67 @@ function getUpcomingGames() {
 
         return game
       })
-      DATABASE.ref('upcomingGames').set(upcomingGames);
+      // DATABASE.ref('upcomingGames').set(upcomingGames);
       console.log('+ running getUpcomingGames... +');
     }
   });
 }
 
-function updateDatabase() {
-  allGames = []
-  MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
-    if(!err) {
+function updateMatchHistory(db) {
+  oldGamesPro = []
+  oldGamesAmateur = []
 
-      //runs python to update mongodb database with new data
-      runPython();
-
-      games = {}
-      var cursor = db.collection('topGames').find();
-      cursor.each((err, doc) => {
-          if (doc != null) {
-            delete doc._id;
-            delete doc.dire_series_wins;
-            delete doc.game_number;
-            delete doc.league_game_id;
-            delete doc.league_id;
-            delete doc.league_tier;
-            delete doc.radiant_series_wins;
-            delete doc.stage_name;
-            delete doc.series_type;
-
-            allGames.push(doc)
-          } else {
-	    allGames.sort((a, b) => {
-              if (a.spectators > b.spectators)
-                return -1;
-              if (a.spectators < b.spectators)
-                return 1;
-              return 0;
-            })
-            DATABASE.ref('sortedGames').set(allGames);
-            db.close();
-          }
-        })
-    } else {
-      console.log('error with mongo');
-      console.log(err);
+  let matchHistory = db.collection('matchHistory').find().sort({_id:-1});
+  matchHistory.each((err, doc) => {
+    if (doc != null) {
+      if (doc['league_tier'] > 1) {
+        oldGamesPro.push(doc)
+      }
+      else {
+        oldGamesAmateur.push(doc)
+      }
     }
-  });
+    else {
+      if (oldGamesPro.length > 0) {
+        DATABASE.ref('matchHistoryPro').set(oldGamesPro);
+      }
+      else if (oldGamesAmateur.length > 0) {
+        DATABASE.ref('matchHistoryAmateur').set(oldGamesAmateur);
+      }
+    } 
+  })
+}
+
+function updateTopGames(db) {
+  allGames = []
+
+  runPython()
+  let topGamesCursor = db.collection('topGames').find();
+  topGamesCursor.each((err, doc) => {
+  
+  if (doc != null) {
+      delete doc._id;
+      delete doc.dire_series_wins;
+      delete doc.game_number;
+      delete doc.league_game_id;
+      delete doc.league_id;
+      delete doc.league_tier;
+      delete doc.radiant_series_wins;
+      delete doc.stage_name;
+      delete doc.series_type;
+
+      allGames.push(doc)
+    } else {
+      allGames.sort((a, b) => {
+        if (a.spectators > b.spectators)
+          return -1;
+        if (a.spectators < b.spectators)
+          return 1;
+        return 0;
+      })
+      DATABASE.ref('sortedGames').set(allGames);
+    }
+  })
 }
 
 var config = {
@@ -128,7 +144,16 @@ getUpcomingGamesJob = new CronJob({
 updateDatabaseJob = new CronJob({
   cronTime: '*/8 * * * * *',
   onTick: () => {
-	  updateDatabase()
+    MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
+      if (!err) {
+        updateTopGames(db)
+        updateMatchHistory(db)
+        db.close();
+      } else {
+          console.log('error with mongo');
+          console.log(err);
+        }
+      });
   },
   start: true,
   runOnInit: true

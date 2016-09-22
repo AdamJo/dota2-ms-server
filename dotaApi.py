@@ -7,6 +7,7 @@ from pymongo import MongoClient
 import sys
 import re
 import os
+import datetime
 
 LOCAL = os.environ['SERVER']
 
@@ -510,12 +511,14 @@ def getMatchDetails(matchId, leagueTier):
   time.sleep(1.2)
   try:
     game = API.get_match_details(matchId) 
+    print ("isdfsdf")
   except Exception as e:
     print('game not found in match history')
     print('error {0}'.format(e))
     return
 
   try:
+    print('+ match details +')
     DB.matchHistory.save(
       {
         'match_id': matchId,
@@ -529,8 +532,10 @@ def getMatchDetails(matchId, leagueTier):
         'negative_votes': game.get('negative_votes', 0),
         'radiant_name': game.get('radiant_name', 'Radiant'),
         'radiant_win': game.get('radiant_win', None),
-        'radiant_score': game.get('radiant_score', 0)
+        'radiant_score': game.get('radiant_score', 0),
+        'createdAt': datetime.datetime.now()
       });
+    print('+ match details saved +')
   except Exception as e:
     print('mongodb save failed')
     print('error {0}'.format(e))
@@ -549,4 +554,5 @@ if __name__ == '__main__':
     else:
       print(games['league_tier'])
   print("--- %s seconds ---" % (time.time() - start_time))
+  # deleteOldMatchHistory()
   CLIENT.close()
