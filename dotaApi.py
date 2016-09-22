@@ -21,6 +21,12 @@ API = dota2api.Initialise(
 All_GAMES = []
 NEW_GAMES = []
 
+# writes file as txt to local
+def writeToDiskTxt(name, export):
+  with open('./resources/{0}.txt'.format(name), 'w') as f:
+    f.write(json.dumps(export, separators=(',',':')))
+
+
 # writes the disk to json for later use
 def writeToDisk(name, export):
   with open('{0}/resources/{1}.json'.format(LOCAL, name), 'w') as f:
@@ -34,6 +40,7 @@ def writeToDisk(name, export):
 # # updates json where items is stored
 def updateItemsReference():
   try:
+    time.sleep(1.2)
     items = API.get_game_items();
     items = items['items'];
     print ('! finding new Item !')
@@ -63,6 +70,7 @@ def updateItemsReference():
 # updates json where  league is stored 
 def formatLeagueReference():
   try:
+    time.sleep(1.2)
     getLeagueListing = API.get_league_listing()
     print ('! finding new League !')
     DB.statusCode.save({'_id': 101, 'get_league_listing': 'Up'})
@@ -82,6 +90,7 @@ def formatLeagueReference():
 # update json where heroes is stored
 def updateHeroesReference():
   try:
+    time.sleep(1.2)
     heroes = API.get_heroes()
     heroes = heroes['heroes'];
     print ('! finding new Hero !')
@@ -131,7 +140,7 @@ def formatLeague(leagueId):
 
   league.pop('description');
   league.pop('itemdef');
-
+  
   if 'leagueid' in league:
     league['league_id'] = league['leagueid'];
     league.pop('leagueid') # the naming on this bothered ; all others were seperated by an _ but not this
@@ -492,12 +501,52 @@ def pullPlayers():
   else:
     print('game length < 0')
 
+def getTopLiveGames():
+  topLiveGames = API.get_top_live_games()
+  sortedTopLiveGames = sorted(one['game_list'], key=itemgetter('average_mmr'), reverse=True)
+  writeToDiskTxt('topGame', sortedTopLiveGames[0])
+
+def getMatchDetails(matchId, leagueTier):
+  time.sleep(1.2)
+  try:
+    game = API.get_match_details(matchId) 
+  except Exception as e:
+    print('game not found in match history')
+    print('error {0}'.format(e))
+    return
+
+  try:
+    DB.matchHistory.save(
+      {
+        'match_id': matchId,
+        'league_tier': leagueTier,
+        'start_time': game.get('start_time', None),
+        'duration': game.get('duration', None),
+        'dire_name': game.get('dire_name', 'Dire'),
+        'dire_score': game.get('dire_score', None),
+        'cluster_name': game.get('cluster_name', None),
+        'positive_votes': game.get('positive_votes', 0),
+        'negative_votes': game.get('negative_votes', 0),
+        'radiant_name': game.get('radiant_name', 'Radiant'),
+        'radiant_win': game.get('radiant_win', None),
+        'radiant_score': game.get('radiant_score', 0)
+      });
+  except Exception as e:
+    print('mongodb save failed')
+    print('error {0}'.format(e))
+    return
+
 if __name__ == '__main__':
   start_time = time.time()
   All_GAMES = DB.topGames.find()
   pullPlayers()
   for games in All_GAMES:
     if games['match_id'] not in NEW_GAMES:
+      if (games['match_id'] > 0 and games['league_tier'] > 0):
+        getMatchDetails(games['match_id'], games['league_tier'])
+      print(games['match_id'])
       DB.topGames.delete_one({'_id': games['match_id']})
+    else:
+      print(games['league_tier'])
   print("--- %s seconds ---" % (time.time() - start_time))
   CLIENT.close()
