@@ -286,7 +286,6 @@ def didGameStart(scoreboard):
     if (player['hero_id'] == 0):
       return False
   return True;
-  
 
 # organize player and tournament information
 def formatPlayers(selectedGame, callLeagueListing):
@@ -391,7 +390,11 @@ def formatPlayers(selectedGame, callLeagueListing):
           dire['players'][i]['position_y'] = int(dire['players'][i]['position_y'])
           dire['players'][i]['items'] = easyItems(dire['players'][i])
           dire['players'][i]['hero'] = easyHeroes(dire['players'][i]['hero_id'])
-          dire['players'][i]['name'] = player['name']
+          if (player['name']):
+            dire['players'][i]['name'] = player['name']
+          else:
+            print("! hero name did not exist !")
+            scoreboard['did_game_start'] = False
           dire['players'][i].pop('hero_id')
       for i, p in enumerate(radiant['players']):
         if player['account_id'] == p['account_id']:
@@ -399,7 +402,11 @@ def formatPlayers(selectedGame, callLeagueListing):
           radiant['players'][i]['position_y'] = int(radiant['players'][i]['position_y'])
           radiant['players'][i]['items'] = easyItems(radiant['players'][i])
           radiant['players'][i]['hero'] = easyHeroes(radiant['players'][i]['hero_id'])
-          radiant['players'][i]['name'] = player['name']
+          if (player['name']):
+            radiant['players'][i]['name'] = player['name']
+          else:
+            print("! hero name did not exist !")
+            scoreboard['did_game_start'] = False
           radiant['players'][i].pop('hero_id')
     print('- player format -')
     # only used player name from players and that is now in the scoreboard
