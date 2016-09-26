@@ -474,21 +474,23 @@ def pullPlayers():
   if len(sortedGamesBySpectators) > 0:
     for index, game in enumerate(sortedGamesBySpectators):
       if 'scoreboard' in sortedGamesBySpectators[index]:
-        selectedGame = sortedGamesBySpectators[index]
+        # determines if game is a bot game with league pass
+        if len(sortedGamesBySpectators[index]['players']) > len(sortedGamesBySpectators[index]['scoreboard']['dire']['players']):
+          selectedGame = sortedGamesBySpectators[index]
 
-        selectedGame = formatPlayers(selectedGame, callLeagueListing)
+          selectedGame = formatPlayers(selectedGame, callLeagueListing)
 
-        try:
-          NEW_GAMES.append(selectedGame['match_id'])
-          selectedGame['_id'] = selectedGame['match_id']
-          DB.topGames.save(selectedGame)
-          count += 1
-          if count == 5:
+          try:
+            NEW_GAMES.append(selectedGame['match_id'])
+            selectedGame['_id'] = selectedGame['match_id']
+            DB.topGames.save(selectedGame)
+            count += 1
+            if count == 5:
+              return
+          except Exception as e:
+            print('mongodb save failed')
+            print('error {0}'.format(e))
             return
-        except Exception as e:
-          print('mongodb save failed')
-          print('error {0}'.format(e))
-          return
   else:
     print('game length < 0')
 

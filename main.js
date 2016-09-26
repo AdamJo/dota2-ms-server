@@ -68,6 +68,7 @@ function getUpcomingGames() {
 }
 
 function updateMatchHistory(db) {
+  console.log("- get Match History +")
   oldGamesPro = []
   oldGamesAmateur = []
 
@@ -83,18 +84,18 @@ function updateMatchHistory(db) {
     }
     else {
       if (oldGamesPro.length > 0) {
-        console.log('here')
         DATABASE.ref('matchHistoryPro').set(oldGamesPro);
       }
       if (oldGamesAmateur.length > 0) {
-        console.log('there')
         DATABASE.ref('matchHistoryAmateur').set(oldGamesAmateur);
       }
     } 
   })
+  console.log("+ get Match History +");
 }
 
 function updateTopGames(db) {
+  console.log("- get top games -");
   allGames = []
 
   runPython()
@@ -121,10 +122,10 @@ function updateTopGames(db) {
           return 1;
         return 0;
       })
-      console.log('!@# sortedGame !@#')
       DATABASE.ref('sortedGames').set(allGames);
     }
   })
+  console.log("+ get Top Games +");
 }
 
 var config = {
