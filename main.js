@@ -69,25 +69,18 @@ function getUpcomingGames() {
 
 function updateMatchHistory(db) {
   console.log("- get Match History +")
-  oldGamesPro = []
-  oldGamesAmateur = []
+  oldGames = []
 
   let matchHistory = db.collection('matchHistory').find().sort({_id:-1});
   matchHistory.each((err, doc) => {
     if (doc != null) {
       if (doc['league_tier'] > 1) {
-        oldGamesPro.push(doc)
-      }
-      else {
-        oldGamesAmateur.push(doc)
+        oldGames.push(doc)
       }
     }
     else {
-      if (oldGamesPro.length > 0) {
-        DATABASE.ref('matchHistoryPro').set(oldGamesPro);
-      }
-      if (oldGamesAmateur.length > 0) {
-        DATABASE.ref('matchHistoryAmateur').set(oldGamesAmateur);
+      if (oldGames.length > 0) {
+        DATABASE.ref('matchHistory').set(oldGames);
       }
     } 
   })

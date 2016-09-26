@@ -503,7 +503,6 @@ def getMatchDetails(matchId, leagueTier):
   time.sleep(1.2)
   try:
     game = API.get_match_details(matchId) 
-    print ("isdfsdf")
   except Exception as e:
     print('game not found in match history')
     print('error {0}'.format(e))
@@ -539,8 +538,8 @@ if __name__ == '__main__':
   pullPlayers()
   for games in All_GAMES:
     if games['match_id'] not in NEW_GAMES:
-      if (games['match_id'] > 0 and games['league_tier'] > 0):
-        getMatchDetails(games['match_id'], games['league_tier'])
+      if (games['match_id'] > 0 and games['league_tier'] > 1):
+        getMatchDetails(games['match_id'])
       print(games['match_id'])
       DB.topGames.delete_one({'_id': games['match_id']})
     else:
