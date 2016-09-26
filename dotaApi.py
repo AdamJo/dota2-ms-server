@@ -468,30 +468,13 @@ def pullPlayers():
     for index, game in enumerate(sortedGamesBySpectators):
       if 'scoreboard' in sortedGamesBySpectators[index]:
         selectedGame = sortedGamesBySpectators[index]
-        # DB.previousGame.save({'_id': 100, 'newLiveLeagueGame': selectedGame})
-
-        # leagueInfo = DB.currentGame.find_one({"_id": 1})
-        # if leagueInfo:
-        #   if 'league' in leagueInfo and 'league_id' in selectedGame:
-        #     if selectedGame['league_id'] == leagueInfo['league']['league_id']:
-        #       print ('+ callLeagueListing : False +') 
-        #       selectedGame['league'] = leagueInfo['league']
-        #       callLeagueListing = False
-        #     else:
-        #       print ('+ callLeagueListing : True +') 
-        #       callLeagueListing = True
-        #   else:
-        #     print ('+ callLeagueListing : True +')  
-        #     callLeagueListing = True
 
         selectedGame = formatPlayers(selectedGame, callLeagueListing)
 
         try:
-          # writeToDisk('currentGame', selectedGame)
           NEW_GAMES.append(selectedGame['match_id'])
           selectedGame['_id'] = selectedGame['match_id']
           DB.topGames.save(selectedGame)
-          # print(_id)
           count += 1
           if count == 5:
             return
@@ -554,5 +537,4 @@ if __name__ == '__main__':
     else:
       print(games['league_tier'])
   print("--- %s seconds ---" % (time.time() - start_time))
-  # deleteOldMatchHistory()
   CLIENT.close()
