@@ -83,9 +83,11 @@ function updateMatchHistory(db) {
     }
     else {
       if (oldGamesPro.length > 0) {
+        console.log('here')
         DATABASE.ref('matchHistoryPro').set(oldGamesPro);
       }
-      else if (oldGamesAmateur.length > 0) {
+      if (oldGamesAmateur.length > 0) {
+        console.log('there')
         DATABASE.ref('matchHistoryAmateur').set(oldGamesAmateur);
       }
     } 
@@ -119,6 +121,7 @@ function updateTopGames(db) {
           return 1;
         return 0;
       })
+      console.log('!@# sortedGame !@#')
       DATABASE.ref('sortedGames').set(allGames);
     }
   })
