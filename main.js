@@ -6,7 +6,7 @@ const request = require('request');
 
 function runPython() {
   console.log('- running python... -');
-  child_process.execSync('python '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
+  child_process.execSync('python3 '+ process.env.SERVER +'/dotaApi.py', {timeout: 10000, stdio:[0,1,2]});
   console.log('+ Python completed! +');
   return 'update Run Python Done'
 }
@@ -61,7 +61,7 @@ function getUpcomingGames() {
 
         return game
       })
-      // DATABASE.ref('upcomingGames').set(upcomingGames);
+      DATABASE.ref('upcomingGames').set(upcomingGames);
       console.log('+ running getUpcomingGames... +');
     }
   });
@@ -98,7 +98,7 @@ function updateTopGames(db) {
   runPython()
   let topGamesCursor = db.collection('topGames').find();
   topGamesCursor.each((err, doc) => {
-  
+
   if (doc != null) {
       delete doc._id;
       delete doc.dire_series_wins;
