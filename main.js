@@ -75,6 +75,7 @@ function updateMatchHistory(db) {
   matchHistory.each((err, doc) => {
     if (doc != null) {
       if (doc['league_tier'] > 1) {
+        delete doc._id;
         oldGames.push(doc)
       }
     }
