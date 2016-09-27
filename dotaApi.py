@@ -539,7 +539,7 @@ if __name__ == '__main__':
   for games in All_GAMES:
     if games['match_id'] not in NEW_GAMES:
       if (games['match_id'] > 0 and games['league_tier'] > 1):
-        getMatchDetails(games['match_id'])
+        getMatchDetails(games['match_id'], games['league_tier'])
       print(games['match_id'])
       DB.topGames.delete_one({'_id': games['match_id']})
     else:
