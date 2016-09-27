@@ -469,28 +469,33 @@ def pullPlayers():
     print ('error {0}'.format(e))
     return
 
-  print(len(sortedGamesBySpectators))
   # if this fails then something went wrong with the api call and don't run the program
   if len(sortedGamesBySpectators) > 0:
     for index, game in enumerate(sortedGamesBySpectators):
       if 'scoreboard' in sortedGamesBySpectators[index]:
-        # determines if game is a bot game with league pass
-        if len(sortedGamesBySpectators[index]['players']) > len(sortedGamesBySpectators[index]['scoreboard']['dire']['players']):
-          selectedGame = sortedGamesBySpectators[index]
+        # only grab game where both sides have at least 1 player and at most 5
+        if (
+          len(sortedGamesBySpectators[index]['scoreboard']['dire']['players']) >= 1 and
+          len(sortedGamesBySpectators[index]['scoreboard']['dire']['players']) <= 5 and
+          len(sortedGamesBySpectators[index]['scoreboard']['radiant']['players']) >= 1 and
+          len(sortedGamesBySpectators[index]['scoreboard']['radiant']['players']) <= 5):
+          # determines if game is a bot game with league pass
+          if len(sortedGamesBySpectators[index]['players']) > len(sortedGamesBySpectators[index]['scoreboard']['dire']['players']):
+            selectedGame = sortedGamesBySpectators[index]
 
-          selectedGame = formatPlayers(selectedGame, callLeagueListing)
+            selectedGame = formatPlayers(selectedGame, callLeagueListing)
 
-          try:
-            NEW_GAMES.append(selectedGame['match_id'])
-            selectedGame['_id'] = selectedGame['match_id']
-            DB.topGames.save(selectedGame)
-            count += 1
-            if count == 5:
+            try:
+              NEW_GAMES.append(selectedGame['match_id'])
+              selectedGame['_id'] = selectedGame['match_id']
+              DB.topGames.save(selectedGame)
+              count += 1
+              if count == 5:
+                return
+            except Exception as e:
+              print('mongodb save failed')
+              print('error {0}'.format(e))
               return
-          except Exception as e:
-            print('mongodb save failed')
-            print('error {0}'.format(e))
-            return
   else:
     print('game length < 0')
 
@@ -539,8 +544,8 @@ if __name__ == '__main__':
   for games in All_GAMES:
     if games['match_id'] not in NEW_GAMES:
       if (games['match_id'] > 0 and games['league_tier'] > 1):
+        print('yeup {0}'.format(games['match_id']))
         getMatchDetails(games['match_id'], games['league_tier'])
-      print(games['match_id'])
       DB.topGames.delete_one({'_id': games['match_id']})
     else:
       print(games['league_tier'])
