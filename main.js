@@ -76,12 +76,19 @@ function updateMatchHistory(db) {
     if (doc != null) {
       if (doc['league_tier'] > 1) {
         delete doc._id;
-        oldGames.push(doc)
+        delete doc.league_tier;
+        delete doc.dire_score;
+        delete doc.duration;
+        delete doc.negative_votes;
+        delete doc.positive_votes;
+        delete doc.radiant_score;
+        delete doc.start_time;
+        oldGames.push(doc);
       }
     }
     else {
       if (oldGames.length > 0) {
-        DATABASE.ref('matchHistory').set(oldGames);
+        DATABASE.ref('matchHistory').set(oldGames.slice(0,52));
       }
     } 
   })
