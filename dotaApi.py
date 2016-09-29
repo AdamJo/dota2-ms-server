@@ -500,9 +500,56 @@ def pullPlayers():
     print('game length < 0')
 
 def getTopLiveGames():
-  topLiveGames = API.get_top_live_games()
-  sortedTopLiveGames = sorted(one['game_list'], key=itemgetter('average_mmr'), reverse=True)
-  writeToDiskTxt('topGame', sortedTopLiveGames[0])
+  print ('- mmr -')
+  players = []
+  mmr = []
+
+  try:
+    topLiveGames = API.get_top_live_games() 
+  except Exception as e:
+    print('game not found in top live games')
+    print('error {0}'.format(e))
+    return
+  
+  sortedTopLiveGames = sorted(topLiveGames['game_list'], key=itemgetter('average_mmr'), reverse=True)
+
+  if len(sortedTopLiveGames) > 0:
+    # sort games by ranked matchmaking and players
+    for game in sortedTopLiveGames:
+      if (game['lobby_type'] == 7 and 'players' in game):
+        mmr.append(game)
+
+    if (len(mmr) > 0):
+      # grab top rated game
+      myGame = mmr[0];
+
+      # get all player account id
+      for index, player in enumerate(myGame['players']):
+        # print(player)
+        players.append(player['account_id'])
+        # print(player['hero_id'])
+        myGame['players'][index]['hero'] = easyHeroes(player['hero_id'])
+        myGame['players'][index].pop('hero_id')
+
+      # grab player summaries 
+      players = API.get_player_summaries(players)['players']
+
+      # sort players 
+      regex = re.compile('http:\/\/steamcommunity.com\/id\/(.*)\/')
+      if (len(players) > 0):
+        for index, player in enumerate(players):
+          myGame['players'][index]['name'] = player['personaname']
+          regexSearch = regex.search(player['profileurl']);
+          if regexSearch:
+            myGame['players'][index]['steam_profile'] = regexSearch.group(1)
+          else:
+            myGame['players'][index]['steam_profile'] = ''
+          myGame['players'][index].pop('account_id')
+
+      # save to same slot in db
+      myGame['_id'] = 1
+      DB.mmrTop.save(myGame)
+  print ('+ mmr +')
 
 def getMatchDetails(matchId, leagueTier):
   time.sleep(1.2)
@@ -544,10 +591,10 @@ if __name__ == '__main__':
   for games in All_GAMES:
     if games['match_id'] not in NEW_GAMES:
       if (games['match_id'] > 0 and games['league_tier'] > 1):
-        print('yeup {0}'.format(games['match_id']))
         getMatchDetails(games['match_id'], games['league_tier'])
       DB.topGames.delete_one({'_id': games['match_id']})
     else:
       print(games['league_tier'])
+  getTopLiveGames()
   print("--- %s seconds ---" % (time.time() - start_time))
   CLIENT.close()

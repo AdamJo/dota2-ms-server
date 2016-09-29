@@ -129,6 +129,30 @@ function updateTopGames(db) {
   console.log("+ get Top Games +");
 }
 
+function mmrTop(db) {
+  let topGame = {}
+
+  console.log("- top mmr game -");
+  let mmrTop = db.collection('mmrTop').find({_id: 1});
+  mmrTop.each((err, doc) => {
+    if (doc != null) {
+        delete doc._id;
+        delete doc.league_id;
+        delete doc.game_mode;
+        delete doc.lobby_type;
+        delete doc.building_state;
+        delete doc.activate_time;
+        delete doc.deactivate_time;
+        delete doc.last_update_time;
+        delete doc.radiant_lead;
+        delete doc.sort_score;
+
+        DATABASE.ref('mmrTop').set(doc);
+      }
+  })
+  console.log("+ top mmr game +")
+}
+
 var config = {
   serviceAccount: process.env.FIREBASE_LOCAL,
   databaseURL: process.env.FIREBASE_DATABASE_URL
@@ -153,6 +177,7 @@ updateDatabaseJob = new CronJob({
       if (!err) {
         updateTopGames(db)
         updateMatchHistory(db)
+        mmrTop(db)
         db.close();
       } else {
           console.log('error with mongo');
