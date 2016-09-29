@@ -130,7 +130,7 @@ function updateTopGames(db) {
 }
 
 function mmrTop(db) {
-  let topGame = {}
+  let topGame = []
 
   console.log("- top mmr game -");
   let mmrTop = db.collection('mmrTop').find({_id: 1});
@@ -147,7 +147,9 @@ function mmrTop(db) {
         delete doc.radiant_lead;
         delete doc.sort_score;
 
-        DATABASE.ref('mmrTop').set(doc);
+        topGame.push(doc)
+      } else {
+        DATABASE.ref('mmrTop').set(topGame);
       }
   })
   console.log("+ top mmr game +")
