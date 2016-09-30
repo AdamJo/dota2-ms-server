@@ -551,10 +551,10 @@ def getTopLiveGames():
           myGame['players'][index]['denies'] = realTimeStatsTeam[index]['denies_count']
           myGame['players'][index]['lh_count'] = realTimeStatsTeam[index]['lh_count']
           myGame['players'][index]['level'] = realTimeStatsTeam[index]['level']
-
-      # save to same slot in db
-      myGame['_id'] = 1
-      DB.mmrTop.save(myGame)
+        
+        # save to same slot in db
+        myGame['_id'] = 1
+        DB.mmrTop.save(myGame)
   print ('+ mmr +')
 
 def getMatchDetails(matchId, leagueTier):
