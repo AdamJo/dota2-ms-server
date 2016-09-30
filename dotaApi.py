@@ -529,10 +529,10 @@ def getTopLiveGames():
     # sort games by ranked matchmaking and players
     for game in sortedTopLiveGames:
       if (game['lobby_type'] == 7 and 'players' in game and game['game_time'] > 0):
-        mmr.append(game)
-
+        # find game games with correct number of players
+        if (len(game['players']) == 10):
+          mmr.append(game)
     if (len(mmr) > 0):
-      # grab top rated game
       myGame = mmr[0];
 
       # get all player account id
