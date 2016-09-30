@@ -9,13 +9,16 @@ import re
 import os
 import datetime
 
+import requests;
+
 LOCAL = os.environ['SERVER']
 
 # make DB and client global
 CLIENT = MongoClient("mongodb://127.0.0.1:27017/")
 DB = CLIENT['dota']
+key = DB.key.find_one()['steam']
 API = dota2api.Initialise(
-  DB.key.find_one()['steam'],
+  key,
   logging=True
 )
 
@@ -499,6 +502,15 @@ def pullPlayers():
   else:
     print('game length < 0')
 
+def getRealTimeStats(serverSteamId):
+  getRealTimeStats = 'https://api.steampowered.com/IDOTA2MatchStats_570/GetRealtimeStats/v1/?key={0}&server_steam_id={1}'.format(key, serverSteamId)
+  realTimeStatsRequest = requests.get(getRealTimeStats)
+  realTimeStatsTeamRequest = realTimeStatsRequest.json()['teams']
+  if len(realTimeStatsTeamRequest[0]['players']) > 0 and len(realTimeStatsTeamRequest[1]['players']) > 0:
+    return realTimeStatsTeamRequest[0]['players'] + realTimeStatsTeamRequest[1]['players']
+  else:
+    return []
+
 def getTopLiveGames():
   print ('- mmr -')
   players = []
@@ -516,7 +528,7 @@ def getTopLiveGames():
   if len(sortedTopLiveGames) > 0:
     # sort games by ranked matchmaking and players
     for game in sortedTopLiveGames:
-      if (game['lobby_type'] == 7 and 'players' in game):
+      if (game['lobby_type'] == 7 and 'players' in game and game['game_time'] > 0):
         mmr.append(game)
 
     if (len(mmr) > 0):
@@ -525,26 +537,20 @@ def getTopLiveGames():
 
       # get all player account id
       for index, player in enumerate(myGame['players']):
-        # print(player)
-        players.append(player['account_id'])
-        # print(player['hero_id'])
         myGame['players'][index]['hero'] = easyHeroes(player['hero_id'])
         myGame['players'][index].pop('hero_id')
 
-      # grab player summaries 
-      players = API.get_player_summaries(players)['players']
+      realTimeStatsTeam = getRealTimeStats(myGame['server_steam_id'])
 
-      # sort players 
-      regex = re.compile('http:\/\/steamcommunity.com\/id\/(.*)\/')
-      if (len(players) > 0):
-        for index, player in enumerate(players):
-          myGame['players'][index]['name'] = player['personaname']
-          regexSearch = regex.search(player['profileurl']);
-          if regexSearch:
-            myGame['players'][index]['steam_profile'] = regexSearch.group(1)
-          else:
-            myGame['players'][index]['steam_profile'] = ''
-          myGame['players'][index].pop('account_id')
+      if realTimeStatsTeam:
+        for (index, game) in enumerate(myGame['players']):
+          myGame['players'][index]['name'] = realTimeStatsTeam[index]['name']
+          myGame['players'][index]['kills'] = realTimeStatsTeam[index]['kill_count']
+          myGame['players'][index]['deaths'] = realTimeStatsTeam[index]['death_count']
+          myGame['players'][index]['assists'] = realTimeStatsTeam[index]['assists_count']
+          myGame['players'][index]['denies'] = realTimeStatsTeam[index]['denies_count']
+          myGame['players'][index]['lh_count'] = realTimeStatsTeam[index]['lh_count']
+          myGame['players'][index]['level'] = realTimeStatsTeam[index]['level']
 
       # save to same slot in db
       myGame['_id'] = 1
