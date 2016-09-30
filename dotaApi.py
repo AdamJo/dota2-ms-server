@@ -548,9 +548,11 @@ def getTopLiveGames():
           myGame['players'][index]['kills'] = realTimeStatsTeam[index]['kill_count']
           myGame['players'][index]['deaths'] = realTimeStatsTeam[index]['death_count']
           myGame['players'][index]['assists'] = realTimeStatsTeam[index]['assists_count']
-          myGame['players'][index]['denies'] = realTimeStatsTeam[index]['denies_count']
-          myGame['players'][index]['lh_count'] = realTimeStatsTeam[index]['lh_count']
+          myGame['players'][index]['dh'] = realTimeStatsTeam[index]['denies_count']
+          myGame['players'][index]['lh'] = realTimeStatsTeam[index]['lh_count']
           myGame['players'][index]['level'] = realTimeStatsTeam[index]['level']
+          myGame['players'][index]['x'] = realTimeStatsTeam[index]['x']
+          myGame['players'][index]['y'] = realTimeStatsTeam[index]['y']
           myGame['players'][index].pop('account_id')
         
         # save to same slot in db
