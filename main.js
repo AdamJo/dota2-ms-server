@@ -88,7 +88,7 @@ function updateMatchHistory(db) {
     }
     else {
       if (oldGames.length > 0) {
-        DATABASE.ref('matchHistory').set(oldGames.slice(0,52));
+        DATABASE.ref('matchHistory').set(oldGames);
       }
     } 
   })
