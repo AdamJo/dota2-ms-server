@@ -515,6 +515,7 @@ def getTopLiveGames():
   print ('- mmr -')
   players = []
   mmr = []
+  allMmrGames = []
 
   try:
     topLiveGames = API.get_top_live_games() 
@@ -533,26 +534,27 @@ def getTopLiveGames():
         if (len(game['players']) == 10):
           mmr.append(game)
     if (len(mmr) > 0):
-      myGame = mmr[0];
+      for (position, mmrGame) in enumerate(mmr[0:5]):
+        # get all player account id
+        for index, player in enumerate(mmrGame['players']):
+          mmrGame['players'][index]['hero'] = easyHeroes(player['hero_id'])
+          mmrGame['players'][index].pop('hero_id')
 
-      # get all player account id
-      for index, player in enumerate(myGame['players']):
-        myGame['players'][index]['hero'] = easyHeroes(player['hero_id'])
-        myGame['players'][index].pop('hero_id')
+        time.sleep(1)
+        realTimeStatsTeam = getRealTimeStats(mmrGame['server_steam_id'])
+  
+        if realTimeStatsTeam:
+          for (index, game) in enumerate(mmrGame['players']):
+            mmrGame['players'][index]['name'] = realTimeStatsTeam[index]['name']
+            mmrGame['players'][index]['kills'] = realTimeStatsTeam[index]['kill_count']
+            mmrGame['players'][index]['deaths'] = realTimeStatsTeam[index]['death_count']
+            mmrGame['players'][index]['assists'] = realTimeStatsTeam[index]['assists_count']
+            mmrGame['players'][index].pop('account_id')
 
-      realTimeStatsTeam = getRealTimeStats(myGame['server_steam_id'])
-
-      if realTimeStatsTeam:
-        for (index, game) in enumerate(myGame['players']):
-          myGame['players'][index]['name'] = realTimeStatsTeam[index]['name']
-          myGame['players'][index]['kills'] = realTimeStatsTeam[index]['kill_count']
-          myGame['players'][index]['deaths'] = realTimeStatsTeam[index]['death_count']
-          myGame['players'][index]['assists'] = realTimeStatsTeam[index]['assists_count']
-          myGame['players'][index].pop('account_id')
+        allMmrGames.append(mmrGame)
         
-        # save to same slot in db
-        myGame['_id'] = 1
-        DB.mmrTop.save(myGame)
+      # save to same slot in db
+      DB.mmrTop.save({'_id': 1, 'games': allMmrGames})
   print ('+ mmr +')
 
 def getMatchDetails(matchId, leagueTier, leagueName):

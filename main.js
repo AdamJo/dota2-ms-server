@@ -133,24 +133,28 @@ function mmrTop(db) {
   let topGame = []
 
   console.log("- top mmr game -");
-  let mmrTop = db.collection('mmrTop').find({_id: 1});
-  mmrTop.each((err, doc) => {
-    if (doc != null) {
-        delete doc._id;
-        delete doc.league_id;
-        delete doc.game_mode;
-        delete doc.lobby_type;
-        delete doc.building_state;
-        delete doc.activate_time;
-        delete doc.deactivate_time;
-        delete doc.last_update_time;
-        delete doc.radiant_lead;
-        delete doc.sort_score;
+  let mmrTop = db.collection('mmrTop').find();
 
-        topGame.push(doc)
-      } else {
-        DATABASE.ref('mmrTop').set(topGame);
+  mmrTop.each((err, doc) => {
+    console.log(doc)
+    if (doc != null) {
+      for (let i = 0; i < doc['games'].length; i++) {
+        delete doc['games'][i]._id;
+        delete doc['games'][i].league_id;
+        delete doc['games'][i].game_mode;
+        delete doc['games'][i].lobby_type;
+        delete doc['games'][i].building_state;
+        delete doc['games'][i].activate_time;
+        delete doc['games'][i].deactivate_time;
+        delete doc['games'][i].last_update_time;
+        delete doc['games'][i].radiant_lead;
+        delete doc['games'][i].sort_score;
+        topGame.push(doc['games'][i])
       }
+    } else {
+      console.log(topGame)
+      DATABASE.ref('mmrTop').set(topGame);
+    }
   })
   console.log("+ top mmr game +")
 }
@@ -173,7 +177,7 @@ getUpcomingGamesJob = new CronJob({
 });
 
 updateDatabaseJob = new CronJob({
-  cronTime: '*/8 * * * * *',
+  cronTime: '*/15 * * * * *',
   onTick: () => {
     MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
       if (!err) {
