@@ -136,7 +136,6 @@ function mmrTop(db) {
   let mmrTop = db.collection('mmrTop').find();
 
   mmrTop.each((err, doc) => {
-    console.log(doc)
     if (doc != null) {
       for (let i = 0; i < doc['games'].length; i++) {
         delete doc['games'][i]._id;
@@ -152,7 +151,6 @@ function mmrTop(db) {
         topGame.push(doc['games'][i])
       }
     } else {
-      console.log(topGame)
       DATABASE.ref('mmrTop').set(topGame);
     }
   })

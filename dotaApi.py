@@ -505,13 +505,22 @@ def pullPlayers():
 def getRealTimeStats(serverSteamId):
   getRealTimeStats = 'https://api.steampowered.com/IDOTA2MatchStats_570/GetRealtimeStats/v1/?key={0}&server_steam_id={1}'.format(key, serverSteamId)
   realTimeStatsRequest = requests.get(getRealTimeStats)
-  realTimeStatsTeamRequest = realTimeStatsRequest.json()['teams']
-  if len(realTimeStatsTeamRequest[0]['players']) > 0 and len(realTimeStatsTeamRequest[1]['players']) > 0:
-    return realTimeStatsTeamRequest[0]['players'] + realTimeStatsTeamRequest[1]['players']
-  else:
+  try:
+    if 'teams' in realTimeStatsRequest.json():
+      realTimeStatsTeamRequest = realTimeStatsRequest.json()['teams']
+      if len(realTimeStatsTeamRequest[0]['players']) > 0 and len(realTimeStatsTeamRequest[1]['players']) > 0:
+        return realTimeStatsTeamRequest[0]['players'] + realTimeStatsTeamRequest[1]['players']
+      else:
+       return []
+    else:
+      return []
+  except Exception as e:
+    print('stats not found')
+    print('error {0}'.format(e))
     return []
 
 def getTopLiveGames():
+  time.sleep(1)
   print ('- mmr -')
   players = []
   mmr = []
@@ -524,7 +533,11 @@ def getTopLiveGames():
     print('error {0}'.format(e))
     return
   
-  sortedTopLiveGames = sorted(topLiveGames['game_list'], key=itemgetter('average_mmr'), reverse=True)
+  if 'game_list' in topLiveGames:
+    sortedTopLiveGames = sorted(topLiveGames['game_list'], key=itemgetter('average_mmr'), reverse=True)
+  else:
+    sortedTopLiveGames = []
+
 
   if len(sortedTopLiveGames) > 0:
     # sort games by ranked matchmaking and players
