@@ -99,7 +99,6 @@ function updateTopGames(db) {
   console.log("- get top games -");
   allGames = []
 
-  runPython()
   let topGamesCursor = db.collection('topGames').find();
   topGamesCursor.each((err, doc) => {
 
@@ -175,10 +174,11 @@ getUpcomingGamesJob = new CronJob({
 });
 
 updateDatabaseJob = new CronJob({
-  cronTime: '*/15 * * * * *',
+  cronTime: '*/5 * * * * *',
   onTick: () => {
     MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
       if (!err) {
+        // runPython()
         updateTopGames(db)
         updateMatchHistory(db)
         mmrTop(db)
