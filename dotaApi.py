@@ -457,8 +457,9 @@ def pullPlayers():
   count = 0;
 
   try:
-    liveLeageGame = API.get_live_league_games()
     time.sleep(1)
+    liveLeageGame = API.get_live_league_games()
+    time.sleep(.2)
     DB.statusCode.save({'_id': 100, 'get_live_league_games': 'Up'})
   except Exception:
     DB.statusCode.save({'_id': 100, 'get_live_league_games': 'Down'})
@@ -538,8 +539,7 @@ def getTopLiveGames():
     sortedTopLiveGames = sorted(topLiveGames['game_list'], key=itemgetter('average_mmr'), reverse=True)
   else:
     sortedTopLiveGames = []
-
-
+  
   if len(sortedTopLiveGames) > 0:
     # sort games by ranked matchmaking and players
     for game in sortedTopLiveGames:
@@ -569,6 +569,8 @@ def getTopLiveGames():
         
       # save to same slot in db
       DB.mmrTop.save({'_id': 1, 'games': allMmrGames})
+  
+  DB.mmrTop.save({'_id': 1, 'games': []})
   print ('+ mmr +')
 
 def getMatchDetails(matchId, leagueTier, leagueName):
@@ -606,18 +608,17 @@ def getMatchDetails(matchId, leagueTier, leagueName):
     return
 
 if __name__ == '__main__':
-  while True:
-    start_time = time.time()
-    All_GAMES = DB.topGames.find()
+  start_time = time.time()
+  All_GAMES = DB.topGames.find()
 
-    pullPlayers()
-    for games in All_GAMES:
-      if games['match_id'] not in NEW_GAMES:
-        if (games['match_id'] > 0 and games['league_tier'] > 1):
-          getMatchDetails(games['match_id'], games['league_tier'], games['league']['name'])
-        DB.topGames.delete_one({'_id': games['match_id']})
-      else:
-        print(games['league_tier'])
-    getTopLiveGames()
-    print("--- %s seconds ---" % (time.time() - start_time))
+  pullPlayers()
+  for games in All_GAMES:
+    if games['match_id'] not in NEW_GAMES:
+      if (games['match_id'] > 0 and games['league_tier'] > 1):
+        getMatchDetails(games['match_id'], games['league_tier'], games['league']['name'])
+      DB.topGames.delete_one({'_id': games['match_id']})
+    else:
+      print(games['league_tier'])
+  getTopLiveGames()
+  print("--- %s seconds ---" % (time.time() - start_time))
   CLIENT.close()
