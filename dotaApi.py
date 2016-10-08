@@ -529,7 +529,7 @@ def getTopLiveGames():
 
   try:
     time.sleep(1)
-    topLiveGames = API.get_top_live_games() 
+    topLiveGames = API.get_top_live_games(1) 
   except Exception as e:
     print('game not found in top live games')
     print('error {0}'.format(e))
@@ -543,10 +543,13 @@ def getTopLiveGames():
   if len(sortedTopLiveGames) > 0:
     # sort games by ranked matchmaking and players
     for game in sortedTopLiveGames:
+      print(game['lobby_type'], game['game_time'])
       if (game['lobby_type'] == 7 and 'players' in game and game['game_time'] > 0):
         # find game games with correct number of players
         if (len(game['players']) == 10):
           mmr.append(game)
+
+    print(len(mmr), 'length mmr found');
     if (len(mmr) > 0):
       for (position, mmrGame) in enumerate(mmr[0:5]):
         # get all player account id
