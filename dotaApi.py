@@ -569,8 +569,8 @@ def getTopLiveGames():
         
       # save to same slot in db
       DB.mmrTop.save({'_id': 1, 'games': allMmrGames})
-  
-  DB.mmrTop.save({'_id': 1, 'games': []})
+  else:
+    DB.mmrTop.save({'_id': 1, 'games': []})
   print ('+ mmr +')
 
 def getMatchDetails(matchId, leagueTier, leagueName):
