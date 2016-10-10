@@ -521,6 +521,8 @@ def getRealTimeStats(serverSteamId):
     print('error {0}'.format(e))
     return []
 
+
+
 def getTopLiveGames():
   print ('- mmr -')
   players = []
@@ -529,7 +531,7 @@ def getTopLiveGames():
 
   try:
     time.sleep(1)
-    topLiveGames = API.get_top_live_games(1) 
+    topLiveGames = API.get_top_live_games() 
   except Exception as e:
     print('game not found in top live games')
     print('error {0}'.format(e))
