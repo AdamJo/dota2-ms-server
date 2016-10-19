@@ -617,13 +617,17 @@ if __name__ == '__main__':
   All_GAMES = DB.topGames.find()
 
   pullPlayers()
-  for games in All_GAMES:
-    if games['match_id'] not in NEW_GAMES:
-      if (games['match_id'] > 0 and games['league_tier'] > 1):
-        getMatchDetails(games['match_id'], games['league_tier'], games['league']['name'])
-      DB.topGames.delete_one({'_id': games['match_id']})
-    else:
-      print(games['league_tier'])
+  if NEW_GAMES:
+    DB.statusCode.save({'_id': 99, 'steamStatus': 'Up'})
+    for games in All_GAMES:
+      if games['match_id'] not in NEW_GAMES:
+        if (games['match_id'] > 0 and games['league_tier'] > 1):
+          getMatchDetails(games['match_id'], games['league_tier'], games['league']['name'])
+        DB.topGames.delete_one({'_id': games['match_id']})
+      else:
+        print(games['league_tier'])
+  else:
+    DB.statusCode.save({'_id': 99, 'steamStatus': 'Down'})
   getTopLiveGames()
   print("--- %s seconds ---" % (time.time() - start_time))
   CLIENT.close()

@@ -156,6 +156,18 @@ function mmrTop(db) {
   console.log("+ top mmr game +")
 }
 
+function gameStatus(db) {
+  db.collection('statusCode').find({_id: 99}).toArray((err, doc) => {
+    if (doc !== null) {
+      if (doc[0]['steamStatus'] === 'Up') {
+        DATABASE.ref('statusCode').set('online');
+      } else {
+        DATABASE.ref('statusCode').set('offline');
+      }
+    }
+  });
+}
+
 var config = {
   serviceAccount: process.env.FIREBASE_LOCAL,
   databaseURL: process.env.FIREBASE_DATABASE_URL
@@ -178,7 +190,7 @@ updateDatabaseJob = new CronJob({
   onTick: () => {
     MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
       if (!err) {
-        // runPython()
+        gameStatus(db)
         updateTopGames(db)
         updateMatchHistory(db)
         mmrTop(db)
