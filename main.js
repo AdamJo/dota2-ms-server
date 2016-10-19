@@ -112,6 +112,8 @@ function updateTopGames(db) {
       delete doc.radiant_series_wins;
       delete doc.stage_name;
       delete doc.series_type;
+      delete doc.ultimate_state;
+      delete doc.account_id;
 
       allGames.push(doc)
     } else {

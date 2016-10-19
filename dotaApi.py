@@ -272,6 +272,11 @@ def popUnused(selectedGame):
 
   return selectedGame
 
+def buybackStatus(gameTime, level):
+  minutes = int(gameTime / 60)
+  return int(round(100 + ( level * level * 1.5 ) + (minutes * 15)))
+
+
 # switches barracks/tower to binary format, 1 is true, 0 is false
 # https://dota2API.readthedocs.io/en/latest/responses.html#single-team-tower-status
 def formatObjectives(scoreboard):
@@ -399,6 +404,7 @@ def formatPlayers(selectedGame, callLeagueListing):
             print("! hero name did not exist !")
             scoreboard['did_game_start'] = False
           dire['players'][i].pop('hero_id')
+          dire['players'][i]['buyback_status'] = buybackStatus(scoreboard['duration'], dire['players'][i]['level'])
       for i, p in enumerate(radiant['players']):
         if player['account_id'] == p['account_id']:
           radiant['players'][i]['position_x'] = int(radiant['players'][i]['position_x'])
@@ -411,6 +417,7 @@ def formatPlayers(selectedGame, callLeagueListing):
             print("! hero name did not exist !")
             scoreboard['did_game_start'] = False
           radiant['players'][i].pop('hero_id')
+          radiant['players'][i]['buyback_status'] = buybackStatus(scoreboard['duration'], radiant['players'][i]['level'])
     print('- player format -')
     # only used player name from players and that is now in the scoreboard
 
