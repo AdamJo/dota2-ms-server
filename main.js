@@ -74,7 +74,7 @@ function updateMatchHistory(db) {
   let matchHistory = db.collection('matchHistory').find().sort({_id:-1});
   matchHistory.each((err, doc) => {
     if (doc != null) {
-      if (doc['league_tier'] > 1) {
+      if (doc['league_tier'] > 1 && doc.dire_name !== "Dire" && doc.radiant_name !== 'Radiant') {
         delete doc._id;
         delete doc.league_tier;
         delete doc.dire_score;
