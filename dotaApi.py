@@ -596,24 +596,30 @@ def getMatchDetails(matchId, leagueTier, leagueName):
 
   try:
     print('+ match details +')
-    DB.matchHistory.save(
-      {
-        'match_id': matchId,
-        'league_tier': leagueTier,
-        'league_name': leagueName,
-        'start_time': game.get('start_time', None),
-        'duration': game.get('duration', None),
-        'dire_name': game.get('dire_name', 'Dire'),
-        'dire_score': game.get('dire_score', None),
-        'cluster_name': game.get('cluster_name', None),
-        'positive_votes': game.get('positive_votes', 0),
-        'negative_votes': game.get('negative_votes', 0),
-        'radiant_name': game.get('radiant_name', 'Radiant'),
-        'radiant_win': game.get('radiant_win', None),
-        'radiant_score': game.get('radiant_score', 0),
-        'createdAt': datetime.datetime.now()
-      });
-    print('+ match details saved +')
+    if (game.get('dire_name') != None or
+        game.get('dire_name') != 'Dire' or
+        game.get('radiant_name') != None or
+        game.get('radiant_name') != 'Radiant'):
+    
+      DB.matchHistory.save(
+        {
+          'match_id': matchId,
+          'league_tier': leagueTier,
+          'league_name': leagueName,
+          'start_time': game.get('start_time', None),
+          'duration': game.get('duration', None),
+          'dire_name': game.get('dire_name', 'Dire'),
+          'dire_score': game.get('dire_score', None),
+          'cluster_name': game.get('cluster_name', None),
+          'positive_votes': game.get('positive_votes', 0),
+          'negative_votes': game.get('negative_votes', 0),
+          'radiant_name': game.get('radiant_name', 'Radiant'),
+          'radiant_win': game.get('radiant_win', None),
+          'radiant_score': game.get('radiant_score', 0),
+          'createdAt': datetime.datetime.now()
+        });
+      print('+ match details saved +')
+
   except Exception as e:
     print('mongodb save failed')
     print('error {0}'.format(e))
