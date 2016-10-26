@@ -474,7 +474,7 @@ def pullPlayers():
   
   try:
     # sort list by spectators
-    sortedGamesBySpectators = sorted(liveLeageGame['games'], key=itemgetter('league_tier', 'spectators'), reverse=True)
+    sortedGamesBySpectators = sorted(liveLeageGame['games'], key=itemgetter('spectators'), reverse=True)
     # writeToDisk('gamesSorted', sortedGamesBySpectators)
   except Exception as e:
     print('sort by spectators failed')
