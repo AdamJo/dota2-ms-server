@@ -71,7 +71,7 @@ function updateMatchHistory(db) {
   console.log("- get Match History +")
   oldGames = []
 
-  let matchHistory = db.collection('matchHistory').find({}, {"limit": 300}).sort({_id:-1});
+  let matchHistory = db.collection('matchHistory').find({}, {"limit": 100}).sort({_id:-1});
   matchHistory.each((err, doc) => {
     if (doc != null) {
       if (doc['league_tier'] > 1) {
