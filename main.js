@@ -150,6 +150,8 @@ function mmrTop(db) {
         delete doc['games'][i].last_update_time;
         delete doc['games'][i].radiant_lead;
         delete doc['games'][i].sort_score;
+        delete doc['games'][i].lobby_id;
+        delete doc['games'][i].server_steam_id;
         topGame.push(doc['games'][i])
       }
     } else {
