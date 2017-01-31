@@ -193,7 +193,7 @@ getUpcomingGamesJob = new CronJob({
 updateDatabaseJob = new CronJob({
   cronTime: '*/5 * * * * *',
   onTick: () => {
-    MongoClient.connect("mongodb://127.0.0.1:27017/dota", (err, db) => {
+    MongoClient.connect(process.env.MONGO_LINK, (err, db) => {
       if (!err) {
         gameStatus(db)
         updateTopGames(db)

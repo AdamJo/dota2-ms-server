@@ -12,9 +12,10 @@ import datetime
 import requests;
 
 LOCAL = os.environ['SERVER']
+MONGO_LINK = os.environ['MONGO_LINK']
 
 # make DB and client global
-CLIENT = MongoClient("mongodb://127.0.0.1:27017/")
+CLIENT = MongoClient(MONGO_LINK)
 DB = CLIENT['dota']
 key = DB.key.find_one()['steam']
 API = dota2api.Initialise(
