@@ -20,7 +20,7 @@ DB = CLIENT['dota']
 key = DB.key.find_one()['steam']
 API = dota2api.Initialise(
   key,
-  logging=True
+  # logging=True
 )
 
 All_GAMES = []
@@ -143,7 +143,7 @@ def formatLeague(leagueId):
       print('! league api down !')
       return {'league_id': 'None'}
 
-  league.pop('description');
+  # league.pop('description');
   league.pop('itemdef');
   
   if 'leagueid' in league:
